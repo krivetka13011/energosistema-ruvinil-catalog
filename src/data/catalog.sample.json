@@ -1,0 +1,48 @@
+{
+  "generatedAt": "1970-01-01T00:00:00.000Z",
+  "sourceCatalog": "https://www.ruvinil.ru/catalog/",
+  "categories": [
+    {
+      "pathname": "/catalog/truby-gofrirovannye/",
+      "title": "Трубы гофрированные",
+      "parentPath": "/catalog/",
+      "slug": "truby-gofrirovannye"
+    },
+    {
+      "pathname": "/catalog/kabel-kanaly/",
+      "title": "Кабель-каналы",
+      "parentPath": "/catalog/",
+      "slug": "kabel-kanaly"
+    }
+  ],
+  "products": [
+    {
+      "url": "https://www.ruvinil.ru/catalog/demo/demo-product/",
+      "slug": "demo__demo-product",
+      "supplierPath": "/catalog/demo/demo-product/",
+      "title": "Пример позиции (запустите npm run scrape)",
+      "image": "",
+      "images": [],
+      "properties": { "Артикул": "00000", "Материал": "—" },
+      "priceHint": "",
+      "availability": "",
+      "listingPage": "https://www.ruvinil.ru/catalog/demo/",
+      "categoryPath": "/catalog/demo/",
+      "descriptionHtml": ""
+    }
+  ],
+  "company": {
+    "name": "Энергосистема",
+    "legalNote": "Розничные цены и наличие уточняйте по телефону или e-mail. Описания и изображения ориентируются на каталог производителя.",
+    "contacts": {
+      "address": "109651, Москва, ул. Иловайская, д. 10, стр. 1, офис 24",
+      "phone": "8 (800) 707-75-03",
+      "email": "zakaz@en-msk.ru",
+      "hours": "Пн. – Пт.: с 9:00 до 18:00"
+    },
+    "supplier": {
+      "name": "Рувинил",
+      "catalogUrl": "https://www.ruvinil.ru/catalog/"
+    }
+  }
+}

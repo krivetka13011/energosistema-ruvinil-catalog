@@ -1,0 +1,120 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import ProductCard from "../../components/ProductCard.astro";
+import type { CatalogCategory } from "../../types/catalog";
+import {
+  catalog,
+  childCategories,
+  descendantProducts,
+  normalizePath,
+  productsInCategory,
+} from "../../utils/catalog";
+
+export function getStaticPaths() {
+  return catalog.categories.map((c) => ({ params: { slug: c.slug } }));
+}
+
+interface Props {
+  slug: string;
+}
+
+const { slug } = Astro.params as Props;
+
+const cat = catalog.categories.find((c) => c.slug === slug);
+if (!cat) throw new Error(`Unknown category slug: ${slug}`);
+
+const byPath = new Map(catalog.categories.map((c) => [normalizePath(c.pathname), c]));
+
+function breadcrumbChain(category: CatalogCategory): CatalogCategory[] {
+  const out: CatalogCategory[] = [];
+  let cur: CatalogCategory | undefined = category;
+  while (cur) {
+    out.unshift(cur);
+    const pp = cur.parentPath ? normalizePath(cur.parentPath) : "/catalog/";
+    if (pp === "/catalog/") break;
+    cur = byPath.get(pp);
+    if (!cur) break;
+  }
+  return out;
+}
+
+const chain = breadcrumbChain(cat);
+const children = childCategories(catalog.categories, cat.pathname);
+const direct = productsInCategory(catalog.products, cat.pathname);
+const inTree = descendantProducts(catalog.products, cat.pathname);
+---
+
+<Layout
+  title={`${cat.title} — каталог ${catalog.company.name}`}
+  description={`${cat.title}: ${inTree.length} позиций в дереве раздела.`}
+  catalog={catalog}
+>
+  <section class="border-b border-slate-200 bg-white">
+    <div class="mx-auto max-w-6xl px-4 py-10">
+      <nav class="reveal flex flex-wrap gap-x-2 gap-y-1 text-sm text-slate-500">
+        <a href="/" class="hover:text-brand-700">Главная</a>
+        <span>/</span>
+        <a href="/catalog/" class="hover:text-brand-700">Каталог</a>
+        {
+          chain.map((c, i) => (
+            <>
+              <span>/</span>
+              {i === chain.length - 1 ? (
+                <span class="text-slate-800">{c.title}</span>
+              ) : (
+                <a href={`/catalog/${c.slug}/`} class="hover:text-brand-700">
+                  {c.title}
+                </a>
+              )}
+            </>
+          ))
+        }
+      </nav>
+      <h1 class="reveal mt-4 font-display text-3xl font-bold text-brand-950 md:text-4xl">{cat.title}</h1>
+      <p class="reveal mt-3 text-slate-600">
+        В этом разделе: <span class="font-semibold text-brand-900">{direct.length}</span> поз. напрямую ·{" "}
+        <span class="font-semibold text-brand-900">{inTree.length}</span> с учётом подразделов.
+      </p>
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-6xl px-4 py-12">
+    {
+      children.length ? (
+        <>
+          <h2 class="reveal font-display text-xl font-semibold text-brand-900">Подразделы</h2>
+          <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {children.map((c) => (
+              <a
+                href={`/catalog/${c.slug}/`}
+                class="reveal rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-brand-600/25 hover:shadow-soft"
+              >
+                <div class="font-display text-lg font-semibold text-brand-900">{c.title}</div>
+                <p class="mt-2 text-sm text-slate-500">
+                  В дереве: {descendantProducts(catalog.products, c.pathname).length} поз.
+                </p>
+              </a>
+            ))}
+          </div>
+        </>
+      ) : null
+    }
+
+    <div class={children.length ? "mt-14" : ""}>
+      <h2 class="reveal font-display text-xl font-semibold text-brand-900">Товары в разделе</h2>
+      {
+        direct.length === 0 ? (
+          <p class="reveal mt-4 text-sm text-slate-600">
+            В этом узле только подразделы или данные ещё не подгружались парсером для этой страницы листинга.
+          </p>
+        ) : (
+          <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {direct.map((p) => (
+              <ProductCard product={p} />
+            ))}
+          </div>
+        )
+      }
+    </div>
+  </section>
+</Layout>

@@ -1,0 +1,134 @@
+---
+import "../styles/global.css";
+import { ViewTransitions } from "astro:transitions";
+import type { CatalogPayload } from "../types/catalog";
+
+interface Props {
+  title: string;
+  description?: string;
+  catalog: CatalogPayload;
+}
+
+const { title, description, catalog } = Astro.props;
+const { company } = catalog;
+---
+
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    {description ? <meta name="description" content={description} /> : null}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Outfit:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <ViewTransitions />
+  </head>
+  <body class="min-h-screen flex flex-col">
+    <header class="sticky top-0 z-40 border-b border-white/10 bg-brand-900/95 backdrop-blur-md text-white shadow-soft">
+      <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 md:py-4">
+        <a href="/" class="group flex items-center gap-3">
+          <span
+            class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 font-display text-lg font-bold ring-1 ring-white/20 transition group-hover:bg-white/15"
+            aria-hidden="true"
+            >Э</span
+          >
+          <div class="leading-tight">
+            <div class="font-display text-base font-semibold tracking-tight md:text-lg">{company.name}</div>
+            <div class="text-xs text-slate-300 md:text-sm">
+              Каталог {company.supplier.name} · розница
+            </div>
+          </div>
+        </a>
+        <nav class="hidden items-center gap-6 text-sm font-medium md:flex" aria-label="Основное меню">
+          <a href="/catalog/" class="transition hover:text-red-200">Каталог</a>
+          <a href="/contacts/" class="transition hover:text-red-200">Контакты</a>
+          <a
+            href={`tel:${company.contacts.phone.replace(/[^\d+]/g, "")}`}
+            class="rounded-full bg-accent px-4 py-2 text-white shadow-soft transition hover:bg-accent-hover"
+          >
+            {company.contacts.phone}
+          </a>
+        </nav>
+        <a
+          href={`tel:${company.contacts.phone.replace(/[^\d+]/g, "")}`}
+          class="rounded-full bg-accent px-3 py-2 text-xs font-semibold text-white md:hidden"
+        >
+          Звонок
+        </a>
+      </div>
+    </header>
+
+    <main class="flex-1">
+      <slot />
+    </main>
+
+    <footer class="border-t border-slate-200 bg-white">
+      <div class="mx-auto grid max-w-6xl gap-8 px-4 py-12 md:grid-cols-3">
+        <div class="reveal">
+          <div class="font-display text-lg font-semibold text-brand-900">{company.name}</div>
+          <p class="mt-2 text-sm leading-relaxed text-slate-600">{company.legalNote}</p>
+        </div>
+        <div class="reveal space-y-2 text-sm text-slate-700">
+          <div class="font-semibold text-brand-900">Контакты</div>
+          <p>{company.contacts.address}</p>
+          <p>
+            <a class="text-brand-700 underline-offset-2 hover:underline" href={`tel:${company.contacts.phone.replace(/[^\d+]/g, "")}`}>
+              {company.contacts.phone}
+            </a>
+          </p>
+          <p>
+            <a class="text-brand-700 underline-offset-2 hover:underline" href={`mailto:${company.contacts.email}`}>
+              {company.contacts.email}
+            </a>
+          </p>
+          <p class="text-slate-500">{company.contacts.hours}</p>
+        </div>
+        <div class="reveal text-sm text-slate-600">
+          <div class="font-semibold text-brand-900">Поставщик</div>
+          <p class="mt-2">
+            Ассортимент по каталогу{" "}
+            <a
+              href={company.supplier.catalogUrl}
+              class="text-brand-700 underline-offset-2 hover:underline"
+              target="_blank"
+              rel="noopener noreferrer"
+              >{company.supplier.name}</a
+            >
+          </p>
+          <p class="mt-4 text-xs text-slate-400">
+            Обновлено: {new Date(catalog.generatedAt).toLocaleString("ru-RU")}
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      function bindReveal() {
+        const els = document.querySelectorAll(".reveal:not([data-reveal-bound])");
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const e of entries) {
+              if (e.isIntersecting) {
+                e.target.classList.add("visible");
+                io.unobserve(e.target);
+              }
+            }
+          },
+          { threshold: 0.12, rootMargin: "0px 0px -5% 0px" },
+        );
+        els.forEach((el) => {
+          el.dataset.revealBound = "1";
+          io.observe(el);
+        });
+      }
+      bindReveal();
+      document.addEventListener("astro:after-swap", bindReveal);
+    </script>
+  </body>
+</html>

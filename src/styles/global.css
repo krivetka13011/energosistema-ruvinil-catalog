@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    .reveal {
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none !important;
+    }
+  }
+}
+
+@layer utilities {
+  .reveal {
+    @apply opacity-0 translate-y-4 transition-all duration-700 ease-out;
+  }
+
+  .reveal.visible {
+    @apply opacity-100 translate-y-0;
+  }
+
+  .mesh-bg {
+    background-color: #0f2744;
+    background-image:
+      radial-gradient(ellipse 120% 80% at 10% -10%, rgba(36, 92, 148, 0.55), transparent 55%),
+      radial-gradient(ellipse 90% 70% at 90% 10%, rgba(198, 40, 40, 0.28), transparent 50%),
+      linear-gradient(180deg, #0f2744 0%, #071526 100%);
+  }
+}
