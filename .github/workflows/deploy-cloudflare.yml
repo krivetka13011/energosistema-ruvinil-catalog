@@ -1,0 +1,34 @@
+# Разовая настройка секретов: см. docs/ONE-TIME-SETUP.md
+# По умолчанию только ручной запуск, чтобы не дублировать деплой с GitHub Pages.
+# Когда перейдёте на Cloudflare: включите push ниже и отключите deploy-pages.yml.
+
+name: Deploy Cloudflare Pages
+
+on:
+  workflow_dispatch:
+  # Раскомментируйте после отключения GitHub Pages:
+  # push:
+  #   branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - name: Build
+        env:
+          PUBLIC_SITE_URL: ${{ vars.PUBLIC_SITE_URL }}
+        run: npm run build
+      - name: Publish to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=${{ secrets.CLOUDFLARE_PAGES_PROJECT_NAME }}

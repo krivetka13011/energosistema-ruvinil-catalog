@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "scripts": {
     "predev": "node scraper/ensure-catalog.mjs",
+    "automation:check": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/check-automation.ps1",
     "scrape": "node scraper/scrape.mjs",
     "scrape:quick": "cross-env SCRAPE_MAX_PAGES=12 SCRAPE_DELAY_MS=350 node scraper/scrape.mjs",
     "prebuild": "node scraper/ensure-catalog.mjs",

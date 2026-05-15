@@ -17,17 +17,17 @@
 $env:SCRAPE_MAX_PAGES="120"; $env:SCRAPE_DELAY_MS="400"; node scraper/scrape.mjs
 ```
 
-## Публикация
+## Публикация и автоматизация
+
+**Разовая настройка push/деплоя:** [docs/ONE-TIME-SETUP.md](docs/ONE-TIME-SETUP.md) (вход через `gh auth login`, привязка репозитория, GitHub Pages или Cloudflare, проверка `npm run automation:check`).
 
 ### GitHub Pages
 
-Включите для репозитория **Settings → Pages → GitHub Actions**. Workflow `.github/workflows/deploy-pages.yml` собирает проект и выкладывает `dist`. Задайте в репозитории переменную **`PUBLIC_SITE_URL`** (например `https://<user>.github.io/<repo>/`), чтобы корректно строились абсолютные URL.
+Включите **Settings → Pages → GitHub Actions**. Workflow `.github/workflows/deploy-pages.yml`. Переменная репозитория **`PUBLIC_SITE_URL`**.
 
 ### Cloudflare Pages
 
-В панели Cloudflare: **Create project → Connect to Git** или загрузка каталога `dist`. Параметры сборки: **Build command** `npm run build`, **Build output directory** `dist`, **Environment variables** `PUBLIC_SITE_URL=https://<ваш-домен>`.
-
-Полный автоматический деплой из этой среды без вашего токена или SSH-ключа выполнить нельзя: нужна авторизация вашего аккаунта GitHub или Cloudflare.
+Через панель (**Connect to Git** или загрузка `dist`) либо workflow **`.github/workflows/deploy-cloudflare.yml`** (секреты в репозитории — см. `docs/ONE-TIME-SETUP.md`).
 
 ## Замечание по контенту и robots.txt
 
