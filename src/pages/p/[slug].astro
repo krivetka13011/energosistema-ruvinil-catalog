@@ -1,6 +1,6 @@
 ---
 import Layout from "../../layouts/Layout.astro";
-import DeferredAddButton from "../../components/DeferredAddButton.astro";
+import AddToCartButton from "../../components/AddToCartButton.astro";
 import { catalog, normalizePath } from "../../utils/catalog";
 import type { CatalogCategory } from "../../types/catalog";
 import { baseUrl } from "../../utils/baseUrl";
@@ -76,8 +76,7 @@ const sku = product.properties["Артикул"] ?? "";
           }
         </div>
         <p class="text-xs text-slate-400">
-          Изображления загружаются с сайта производителя. При недоступности файлов проверьте подключение или запустите
-          синхронизацию позже.
+          Если изображение не отображается, обновите страницу или сообщите менеджеру — проверим файл на стороне каталога.
         </p>
       </div>
 
@@ -92,7 +91,7 @@ const sku = product.properties["Артикул"] ?? "";
             <p class="mt-4 text-lg text-slate-600">Розничную цену уточняйте у менеджера.</p>
           )}
           <div class="mt-6 max-w-md">
-            <DeferredAddButton slug={product.slug} title={product.title} sku={sku} image={product.image} />
+            <AddToCartButton slug={product.slug} title={product.title} sku={sku} image={product.image} />
           </div>
         </div>
 
@@ -129,12 +128,6 @@ const sku = product.properties["Артикул"] ?? "";
           ) : null
         }
 
-        <p class="text-xs text-slate-400">
-          Источник карточки:{" "}
-          <a href={product.url} class="text-brand-700 underline-offset-2 hover:underline" target="_blank" rel="noopener noreferrer">
-            страница в каталоге производителя
-          </a>
-        </p>
       </div>
     </div>
   </article>

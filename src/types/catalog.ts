@@ -22,7 +22,8 @@ export interface CatalogProduct {
 
 export interface CatalogPayload {
   generatedAt: string;
-  sourceCatalog: string;
+  /** Устарело: может присутствовать в старых сборках */
+  sourceCatalog?: string;
   categories: CatalogCategory[];
   products: CatalogProduct[];
   company: {
@@ -34,7 +35,8 @@ export interface CatalogPayload {
       email: string;
       hours: string;
     };
-    supplier: {
+    /** Устарело */
+    supplier?: {
       name: string;
       catalogUrl: string;
     };

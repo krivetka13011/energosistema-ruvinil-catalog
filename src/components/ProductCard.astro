@@ -1,7 +1,7 @@
 ---
 import type { CatalogProduct } from "../types/catalog";
 import { baseUrl } from "../utils/baseUrl";
-import DeferredAddButton from "./DeferredAddButton.astro";
+import AddToCartButton from "./AddToCartButton.astro";
 
 interface Props {
   product: CatalogProduct;
@@ -50,6 +50,6 @@ const sku = product.properties["Артикул"] ?? "";
     </div>
   </a>
   <div class="border-t border-slate-100 bg-slate-50/90 px-4 py-3">
-    <DeferredAddButton slug={product.slug} title={product.title} sku={sku} image={product.image} />
+    <AddToCartButton slug={product.slug} title={product.title} sku={sku} image={product.image} />
   </div>
 </div>

@@ -1,6 +1,5 @@
 {
   "generatedAt": "2026-05-15T10:30:51.288Z",
-  "sourceCatalog": "https://www.ruvinil.ru/catalog/",
   "categories": [
     {
       "pathname": "/catalog/aksessuary-dlya-drenazhnykh-trub/",
@@ -6666,16 +6665,12 @@
   ],
   "company": {
     "name": "Энергосистема",
-    "legalNote": "Розничные цены и наличие уточняйте по телефону или e-mail. Описания и изображения ориентируются на каталог производителя.",
+    "legalNote": "Розничные цены и наличие уточняйте по телефону или e-mail.",
     "contacts": {
       "address": "109651, Москва, ул. Иловайская, д. 10, стр. 1, офис 24",
       "phone": "8 (800) 707-75-03",
       "email": "zakaz@en-msk.ru",
       "hours": "Пн. – Пт.: с 9:00 до 18:00"
-    },
-    "supplier": {
-      "name": "Рувинил",
-      "catalogUrl": "https://www.ruvinil.ru/catalog/"
     }
   }
 }

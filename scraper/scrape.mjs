@@ -4,10 +4,13 @@ import path from "path";
 
 const BASE = "https://www.ruvinil.ru";
 const UA =
-  "Mozilla/5.0 (compatible; CatalogMirror/1.0; retail partner indexing ruvinil.ru/catalog; contact: zakaz@en-msk.ru)";
+  "Mozilla/5.0 (compatible; RetailCatalogBot/1.0; +mailto:zakaz@en-msk.ru) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
 const DELAY_MS = Number(process.env.SCRAPE_DELAY_MS ?? 450);
-const MAX_PAGES = Number(process.env.SCRAPE_MAX_PAGES ?? 600);
+const MAX_PAGES_RAW = process.env.SCRAPE_MAX_PAGES;
+const MAX_PAGES =
+  MAX_PAGES_RAW === undefined || MAX_PAGES_RAW === "" ? Number.POSITIVE_INFINITY : Number(MAX_PAGES_RAW);
+const FETCH_RETRIES = Number(process.env.SCRAPE_FETCH_RETRIES ?? 4);
 const WITH_DETAILS = process.argv.includes("--details");
 
 /** @type {Map<string, { title: string, parentPath: string | null }>} */
@@ -24,17 +27,33 @@ function normalizeCatalogPath(pathname) {
 }
 
 async function fetchHtml(url) {
-  await sleep(DELAY_MS);
-  const res = await fetch(url, {
-    headers: {
-      "User-Agent": UA,
-      Accept: "text/html,application/xhtml+xml",
-      "Accept-Language": "ru-RU,ru;q=0.9",
-    },
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
-  const buf = Buffer.from(await res.arrayBuffer());
-  return buf.toString("utf8");
+  let lastErr;
+  for (let attempt = 0; attempt < FETCH_RETRIES; attempt++) {
+    await sleep(DELAY_MS);
+    try {
+      const res = await fetch(url, {
+        headers: {
+          "User-Agent": UA,
+          Accept: "text/html,application/xhtml+xml",
+          "Accept-Language": "ru-RU,ru;q=0.9",
+        },
+      });
+      if (res.ok) {
+        const buf = Buffer.from(await res.arrayBuffer());
+        return buf.toString("utf8");
+      }
+      if (res.status === 429 || res.status >= 500) {
+        lastErr = new Error(`HTTP ${res.status} for ${url}`);
+        await sleep(DELAY_MS * (attempt + 2));
+        continue;
+      }
+      throw new Error(`HTTP ${res.status} for ${url}`);
+    } catch (e) {
+      lastErr = e;
+      if (attempt < FETCH_RETRIES - 1) await sleep(DELAY_MS * (attempt + 2));
+    }
+  }
+  throw lastErr ?? new Error(`fetch failed ${url}`);
 }
 
 function extractPaginationUrls(html, pageUrl) {
@@ -171,7 +190,10 @@ async function main() {
   const products = new Map();
   let pages = 0;
 
-  console.error(`Scrape start (max pages ${MAX_PAGES}, details=${WITH_DETAILS})`);
+  const limitLabel =
+    MAX_PAGES_RAW === undefined || MAX_PAGES_RAW === "" ? "не ограничено" : String(MAX_PAGES);
+
+  console.error(`Scrape start (max pages ${limitLabel}, details=${WITH_DETAILS}, retries=${FETCH_RETRIES})`);
 
   while (queue.length && pages < MAX_PAGES) {
     const url = queue.shift();
@@ -203,9 +225,13 @@ async function main() {
       products.set(p.url, p);
     }
 
-    if (pages % 10 === 0) {
+    if (pages % 25 === 0) {
       console.error(`…pages ${pages}, queue ${queue.length}, products ${products.size}`);
     }
+  }
+
+  if (queue.length && Number.isFinite(MAX_PAGES)) {
+    console.error(`Внимание: осталось ${queue.length} URL в очереди — достигнут SCRAPE_MAX_PAGES=${MAX_PAGES_RAW}`);
   }
 
   /** @type {any[]} */
@@ -254,23 +280,17 @@ async function main() {
 
   const company = {
     name: "Энергосистема",
-    legalNote:
-      "Розничные цены и наличие уточняйте по телефону или e-mail. Описания и изображения ориентируются на каталог производителя.",
+    legalNote: "Розничные цены и наличие уточняйте по телефону или e-mail.",
     contacts: {
       address: "109651, Москва, ул. Иловайская, д. 10, стр. 1, офис 24",
       phone: "8 (800) 707-75-03",
       email: "zakaz@en-msk.ru",
       hours: "Пн. – Пт.: с 9:00 до 18:00",
     },
-    supplier: {
-      name: "Рувинил",
-      catalogUrl: `${BASE}/catalog/`,
-    },
   };
 
   const payload = {
     generatedAt: new Date().toISOString(),
-    sourceCatalog: `${BASE}/catalog/`,
     categories,
     products: list,
     company,

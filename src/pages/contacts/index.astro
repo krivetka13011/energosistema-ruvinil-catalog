@@ -1,6 +1,7 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import { catalog } from "../../utils/catalog";
+import { baseUrl } from "../../utils/baseUrl";
 import { yandexMapsExternalUrl, yandexWidgetSrc } from "../../config/office-map";
 
 const { company } = catalog;
@@ -61,14 +62,12 @@ const mapOpen = yandexMapsExternalUrl();
         </p>
       </div>
       <div class="rounded-2xl bg-brand-900 p-6 text-white shadow-soft">
-        <p class="text-sm text-slate-200">Каталог производителя для справки:</p>
+        <p class="text-sm text-slate-200">Оформление заказа онлайн</p>
         <a
-          href={company.supplier.catalogUrl}
+          href={baseUrl("/cart/")}
           class="mt-2 inline-flex font-semibold text-red-100 underline-offset-2 hover:underline"
-          target="_blank"
-          rel="noopener noreferrer"
         >
-          {company.supplier.catalogUrl}
+          Перейти в корзину →
         </a>
       </div>
     </div>

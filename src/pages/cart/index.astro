@@ -1,0 +1,89 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { catalog } from "../../utils/catalog";
+import { baseUrl } from "../../utils/baseUrl";
+
+const orderEmail = catalog.company.contacts.email;
+---
+
+<Layout
+  title={`Корзина — ${catalog.company.name}`}
+  description="Оформление заказа по телефону и e-mail."
+  catalog={catalog}
+>
+  <div data-order-email={orderEmail}>
+    <section class="border-b border-slate-200 bg-white">
+      <div class="mx-auto max-w-3xl px-4 py-12">
+        <nav class="text-sm text-slate-500">
+          <a href={baseUrl("/")} class="hover:text-brand-700">Главная</a>
+          <span class="mx-2">/</span>
+          <span class="text-slate-800">Корзина</span>
+        </nav>
+        <h1 class="mt-4 font-display text-3xl font-bold text-brand-950 md:text-4xl">Корзина</h1>
+        <p class="mt-2 text-slate-600">
+          Товары сохраняются в браузере. Чтобы отправить заявку менеджеру, заполните форму ниже — откроется письмо на{" "}
+          <span class="font-medium text-brand-800">{orderEmail}</span>.
+        </p>
+      </div>
+    </section>
+
+    <section class="mx-auto max-w-3xl px-4 py-10">
+      <div id="cart-list-root" class="space-y-4"></div>
+
+      <div id="cart-checkout-panel" class="mt-12 hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+        <h2 class="font-display text-xl font-semibold text-brand-900">Оформить заказ</h2>
+        <p class="mt-2 text-sm text-slate-600">Укажите контакты — мы свяжемся для подтверждения и счёта.</p>
+
+        <form id="cart-checkout-form" class="mt-6 space-y-4">
+          <div>
+            <label for="customer_name" class="block text-xs font-semibold uppercase tracking-wide text-slate-500">Имя *</label>
+            <input
+              id="customer_name"
+              name="customer_name"
+              required
+              autocomplete="name"
+              class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-2.5 text-brand-950 outline-none ring-brand-600/30 focus:border-brand-600 focus:ring-2"
+              placeholder="Как к вам обращаться"
+            />
+          </div>
+          <div>
+            <label for="customer_phone" class="block text-xs font-semibold uppercase tracking-wide text-slate-500">Телефон *</label>
+            <input
+              id="customer_phone"
+              name="customer_phone"
+              type="tel"
+              required
+              autocomplete="tel"
+              value="+7"
+              class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-2.5 text-brand-950 outline-none ring-brand-600/30 focus:border-brand-600 focus:ring-2"
+              placeholder="+79991234567"
+            />
+          </div>
+          <div>
+            <label for="customer_email" class="block text-xs font-semibold uppercase tracking-wide text-slate-500">E-mail *</label>
+            <input
+              id="customer_email"
+              name="customer_email"
+              type="email"
+              required
+              autocomplete="email"
+              class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-2.5 text-brand-950 outline-none ring-brand-600/30 focus:border-brand-600 focus:ring-2"
+              placeholder="you@example.ru"
+            />
+          </div>
+          <p id="cart-checkout-msg" class="text-sm text-accent" role="status"></p>
+          <button
+            type="submit"
+            class="w-full rounded-xl bg-brand-900 px-6 py-3 font-display text-base font-semibold text-white shadow-soft transition hover:bg-brand-800 sm:w-auto"
+          >
+            Отправить заказ
+          </button>
+        </form>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    import "../../scripts/cart-page.ts";
+  </script>
+</Layout>

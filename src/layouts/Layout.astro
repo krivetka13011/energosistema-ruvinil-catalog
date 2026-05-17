@@ -41,9 +41,7 @@ const { company } = catalog;
           >
           <div class="leading-tight">
             <div class="font-display text-base font-semibold tracking-tight md:text-lg">{company.name}</div>
-            <div class="text-xs text-slate-300 md:text-sm">
-              Каталог {company.supplier.name} · розница
-            </div>
+            <div class="text-xs text-slate-300 md:text-sm">Электротехника · розница</div>
           </div>
         </a>
         <nav
@@ -52,10 +50,10 @@ const { company } = catalog;
         >
           <a href={baseUrl("/catalog/")} class="transition hover:text-red-200">Каталог</a>
           <a href={baseUrl("/search/")} class="transition hover:text-red-200">Поиск</a>
-          <a href={baseUrl("/deferred/")} class="inline-flex items-center gap-1.5 transition hover:text-red-200">
-            <span>Отложенное</span>
+          <a href={baseUrl("/cart/")} class="inline-flex items-center gap-1.5 transition hover:text-red-200">
+            <span>Корзина</span>
             <span
-              id="deferred-cart-badge"
+              id="cart-badge"
               class="hidden min-w-[1.35rem] rounded-full bg-white/25 px-1.5 py-0.5 text-center text-[10px] font-bold leading-none text-white sm:text-xs"
               aria-live="polite"
               >0</span
@@ -83,10 +81,13 @@ const { company } = catalog;
     </main>
 
     <footer class="border-t border-slate-200 bg-white">
-      <div class="mx-auto grid max-w-6xl gap-8 px-4 py-12 md:grid-cols-3">
+      <div class="mx-auto grid max-w-6xl gap-8 px-4 py-12 md:grid-cols-2">
         <div class="reveal">
           <div class="font-display text-lg font-semibold text-brand-900">{company.name}</div>
           <p class="mt-2 text-sm leading-relaxed text-slate-600">{company.legalNote}</p>
+          <p class="mt-4 text-xs text-slate-400">
+            Обновлено: {new Date(catalog.generatedAt).toLocaleString("ru-RU")}
+          </p>
         </div>
         <div class="reveal space-y-2 text-sm text-slate-700">
           <div class="font-semibold text-brand-900">Контакты</div>
@@ -102,28 +103,15 @@ const { company } = catalog;
             </a>
           </p>
           <p class="text-slate-500">{company.contacts.hours}</p>
-        </div>
-        <div class="reveal text-sm text-slate-600">
-          <div class="font-semibold text-brand-900">Поставщик</div>
-          <p class="mt-2">
-            Ассортимент по каталогу{" "}
-            <a
-              href={company.supplier.catalogUrl}
-              class="text-brand-700 underline-offset-2 hover:underline"
-              target="_blank"
-              rel="noopener noreferrer"
-              >{company.supplier.name}</a
-            >
-          </p>
-          <p class="mt-4 text-xs text-slate-400">
-            Обновлено: {new Date(catalog.generatedAt).toLocaleString("ru-RU")}
+          <p class="pt-2">
+            <a href={baseUrl("/cart/")} class="font-semibold text-brand-700 underline-offset-2 hover:underline">Корзина и оформление заказа</a>
           </p>
         </div>
       </div>
     </footer>
 
     <script>
-      import "../scripts/deferred-cart-ui.ts";
+      import "../scripts/cart-ui.ts";
     </script>
     <script>
       function bindReveal() {
