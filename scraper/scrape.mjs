@@ -72,25 +72,37 @@ function extractPaginationUrls(html, pageUrl) {
   return [...out];
 }
 
+/** Inline SVG карточки раздела (напр. «Заказные позиции») → data URL для поля image */
+function svgSectionToDataUrl($, svgSel) {
+  if (!svgSel.length) return "";
+  const raw = $.html(svgSel);
+  if (!raw || raw.length > 200000) return "";
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(raw)}`;
+}
+
 function extractSectionLinks(html, pageUrl) {
   const $ = cheerio.load(html);
   const out = [];
   $("a.catalog-section-item").each((_, el) => {
-    const href = $(el).attr("href");
-    const title = $(el).find(".catalog-section-item-title").first().text().trim();
+    const $a = $(el);
+    const href = $a.attr("href");
+    const title = $a.find(".catalog-section-item-title").first().text().trim();
     if (!href || !title) return;
+
     let image = "";
-    const imgEl = $(el).find(".catalog-section-item-image img").first().length
-      ? $(el).find(".catalog-section-item-image img").first()
-      : $(el).find("img").first();
-    const imgSrc = imgEl.attr("src") || imgEl.attr("data-src") || "";
+    const $img = $a.find("img").first();
+    const imgSrc = $img.attr("src") || $img.attr("data-src") || "";
     if (imgSrc) {
       try {
-        image = new URL(imgSrc, pageUrl).href;
+        image = new URL(imgSrc, BASE).href;
       } catch {
-        image = imgSrc.startsWith("http") ? imgSrc : `${BASE}${imgSrc}`;
+        image = imgSrc.startsWith("http") ? imgSrc : `${BASE}${imgSrc.startsWith("/") ? "" : "/"}${imgSrc}`;
       }
+    } else {
+      const $svg = $a.find("svg").first();
+      image = svgSectionToDataUrl($, $svg);
     }
+
     try {
       const abs = new URL(href, pageUrl).href;
       const pathname = normalizeCatalogPath(new URL(abs).pathname);

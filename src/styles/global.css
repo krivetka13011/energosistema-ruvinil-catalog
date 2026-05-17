@@ -44,4 +44,16 @@
   .catalog-supplier-bg {
     background: linear-gradient(165deg, #3d89c4 0%, #2a6a9e 42%, #174066 78%, #0f2744 100%);
   }
+
+  /**
+   * На ruvinil.ru у превью разделов по умолчанию filter: saturate(0), при hover saturate(1).
+   * Показываем сразу «цветное» состояние как после наведения у поставщика.
+   */
+  .supplier-color-photo {
+    filter: saturate(1);
+  }
+
+  .supplier-color-photo[src^="data:image/svg+xml"] {
+    filter: none;
+  }
 }
