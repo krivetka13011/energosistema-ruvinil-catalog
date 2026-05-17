@@ -8,7 +8,8 @@
     "scrape": "node scraper/scrape.mjs",
     "scrape:full": "node scraper/scrape.mjs --details",
     "scrape:quick": "cross-env SCRAPE_MAX_PAGES=12 SCRAPE_DELAY_MS=350 node scraper/scrape.mjs",
-    "prebuild": "node scraper/ensure-catalog.mjs && node scripts/build-search-index.mjs",
+    "analyze:category-photos": "node scripts/analyze-category-photo-borders.mjs",
+    "prebuild": "node scraper/ensure-catalog.mjs && node scripts/build-search-index.mjs && node scripts/analyze-category-photo-borders.mjs",
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview"
@@ -21,6 +22,7 @@
   "devDependencies": {
     "cheerio": "^1.0.0",
     "cross-env": "^7.0.3",
+    "sharp": "^0.34.5",
     "typescript": "^5.8.3"
   }
 }

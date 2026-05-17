@@ -1,4 +1,6 @@
 ---
+import categoryImageScale from "../data/categoryImageScale.json";
+
 export interface Props {
   href: string;
   title: string;
@@ -8,6 +10,13 @@ export interface Props {
 }
 
 const { href, title, image = "", subtitle } = Astro.props;
+
+const scales = categoryImageScale as Record<string, number>;
+const rawScale = image ? scales[image] : undefined;
+const scale =
+  typeof rawScale === "number" && Number.isFinite(rawScale) && rawScale >= 1.002
+    ? Math.round(rawScale * 1000) / 1000
+    : 1;
 ---
 
 <a
@@ -30,16 +39,17 @@ const { href, title, image = "", subtitle } = Astro.props;
   <div class="relative h-[220px] shrink-0 bg-white">
     {
       image ? (
-        <div class="absolute inset-x-3 inset-y-2 flex flex-col justify-end">
+        <div class="absolute inset-x-3 inset-y-2 flex flex-col justify-end overflow-hidden">
           <img
             src={image}
             alt=""
             width={280}
             height={200}
-            class="supplier-category-photo motion-safe:transition motion-safe:duration-300 motion-safe:group-hover:scale-[1.02]"
+            class="supplier-category-photo"
             loading="lazy"
             decoding="async"
             referrerpolicy="no-referrer"
+            style={scale > 1.002 ? { "--category-photo-scale": String(scale) } : undefined}
           />
         </div>
       ) : (
