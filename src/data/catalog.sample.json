@@ -5,13 +5,15 @@
       "pathname": "/catalog/truby-gofrirovannye/",
       "title": "Трубы гофрированные",
       "parentPath": "/catalog/",
-      "slug": "truby-gofrirovannye"
+      "slug": "truby-gofrirovannye",
+      "sortHint": 0
     },
     {
       "pathname": "/catalog/kabel-kanaly/",
       "title": "Кабель-каналы",
       "parentPath": "/catalog/",
-      "slug": "kabel-kanaly"
+      "slug": "kabel-kanaly",
+      "sortHint": 1
     }
   ],
   "products": [

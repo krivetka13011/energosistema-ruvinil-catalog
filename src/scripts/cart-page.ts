@@ -36,7 +36,7 @@ function renderList() {
         <div class="h-24 w-28 shrink-0 overflow-hidden rounded-xl bg-slate-100">
           ${
             it.image
-              ? `<img src=${imgSrc} alt="" class="h-full w-full object-contain p-2" loading="lazy" />`
+              ? `<img src=${imgSrc} alt="" class="h-full w-full object-contain p-2" loading="lazy" referrerpolicy="no-referrer" />`
               : `<div class="flex h-full items-center justify-center text-xs text-slate-400">Нет фото</div>`
           }
         </div>

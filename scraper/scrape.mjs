@@ -13,7 +13,7 @@ const MAX_PAGES =
 const FETCH_RETRIES = Number(process.env.SCRAPE_FETCH_RETRIES ?? 4);
 const WITH_DETAILS = process.argv.includes("--details");
 
-/** @type {Map<string, { title: string, parentPath: string | null }>} */
+/** @type {Map<string, { title: string, parentPath: string | null, image: string, sortHint?: number }>} */
 const categoryMeta = new Map();
 
 function sleep(ms) {
@@ -79,11 +79,23 @@ function extractSectionLinks(html, pageUrl) {
     const href = $(el).attr("href");
     const title = $(el).find(".catalog-section-item-title").first().text().trim();
     if (!href || !title) return;
+    let image = "";
+    const imgEl = $(el).find(".catalog-section-item-image img").first().length
+      ? $(el).find(".catalog-section-item-image img").first()
+      : $(el).find("img").first();
+    const imgSrc = imgEl.attr("src") || imgEl.attr("data-src") || "";
+    if (imgSrc) {
+      try {
+        image = new URL(imgSrc, pageUrl).href;
+      } catch {
+        image = imgSrc.startsWith("http") ? imgSrc : `${BASE}${imgSrc}`;
+      }
+    }
     try {
       const abs = new URL(href, pageUrl).href;
       const pathname = normalizeCatalogPath(new URL(abs).pathname);
       if (!pathname || pathname === "/catalog/") return;
-      out.push({ url: `${BASE}${pathname}`, title, pathname });
+      out.push({ url: `${BASE}${pathname}`, title, pathname, image });
     } catch {
       /* ignore */
     }
@@ -112,7 +124,8 @@ function extractProducts(html, pageUrl) {
     }
     if (!absUrl.includes("/catalog/")) return;
 
-    const imgSrc = box.find("a.product-picture img").first().attr("src") || "";
+    const imgEl = box.find("a.product-picture img").first();
+    const imgSrc = imgEl.attr("src") || imgEl.attr("data-src") || imgEl.attr("data-lazyload-src") || "";
     let image = imgSrc;
     try {
       image = imgSrc ? new URL(imgSrc, BASE).href : "";
@@ -150,12 +163,20 @@ function extractProducts(html, pageUrl) {
 
 function mergeCategoryMeta(parentUrl, sections) {
   const parentPath = normalizeCatalogPath(new URL(parentUrl).pathname);
-  for (const s of sections) {
+  sections.forEach((s, idx) => {
     const existing = categoryMeta.get(s.pathname);
     if (!existing) {
-      categoryMeta.set(s.pathname, { title: s.title, parentPath });
+      categoryMeta.set(s.pathname, {
+        title: s.title,
+        parentPath,
+        image: s.image || "",
+        sortHint: idx,
+      });
+    } else {
+      if (existing.sortHint === undefined) existing.sortHint = idx;
+      if (!existing.image && s.image) existing.image = s.image;
     }
-  }
+  });
 }
 
 function pathToSlug(rel) {
@@ -169,7 +190,7 @@ async function enrichProductDetails(product) {
   const desc = $(".product-description").first().html()?.trim() ?? "";
   const images = [];
   $(".product-images img").each((_, el) => {
-    const src = $(el).attr("src");
+    const src = $(el).attr("src") || $(el).attr("data-src") || "";
     if (!src) return;
     try {
       images.push(new URL(src, BASE).href);
@@ -261,14 +282,20 @@ async function main() {
     }
   }
 
-  /** @type {{ pathname: string, title: string, parentPath: string | null }[]} */
+  /** @type {{ pathname: string, title: string, parentPath: string | null, slug: string, image?: string, sortHint?: number }[]} */
   const categories = [...categoryMeta.entries()]
-    .map(([pathname, meta]) => ({
-      pathname,
-      title: meta.title,
-      parentPath: meta.parentPath,
-      slug: pathToSlug(pathname.replace(/^\/catalog\/?/, "")),
-    }))
+    .map(([pathname, meta]) => {
+      /** @type {{ pathname: string, title: string, parentPath: string | null, slug: string, image?: string, sortHint?: number }} */
+      const row = {
+        pathname,
+        title: meta.title,
+        parentPath: meta.parentPath,
+        slug: pathToSlug(pathname.replace(/^\/catalog\/?/, "")),
+      };
+      if (meta.image) row.image = meta.image;
+      if (meta.sortHint !== undefined) row.sortHint = meta.sortHint;
+      return row;
+    })
     .sort((a, b) => a.pathname.localeCompare(b.pathname, "ru"));
 
   for (const p of list) {

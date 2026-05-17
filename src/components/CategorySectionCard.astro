@@ -1,0 +1,44 @@
+---
+export interface Props {
+  href: string;
+  title: string;
+  image?: string;
+  /** Короткая строка под заголовком (например число позиций) */
+  subtitle?: string;
+}
+
+const { href, title, image = "", subtitle } = Astro.props;
+---
+
+<a
+  href={href}
+  class="group flex h-full min-h-[280px] flex-col overflow-hidden rounded-2xl border border-sky-200/80 bg-sky-100/95 shadow-sm outline-none transition hover:border-sky-300 hover:bg-sky-50 hover:shadow-md focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 focus-visible:ring-offset-[#2a6a9e]"
+>
+  <div class="px-4 pb-2 pt-5">
+    <h2 class="font-display text-lg font-semibold leading-snug text-brand-950 group-hover:text-brand-800 md:text-xl">
+      {title}
+    </h2>
+    {subtitle ? <p class="mt-2 text-sm text-slate-600">{subtitle}</p> : null}
+  </div>
+  <div class="mt-auto flex min-h-[160px] flex-1 items-center justify-center bg-white px-4 py-6">
+    {
+      image ? (
+        <img
+          src={image}
+          alt=""
+          width={280}
+          height={200}
+          class="max-h-44 w-full object-contain transition duration-300 group-hover:scale-[1.02]"
+          loading="lazy"
+          decoding="async"
+          referrerpolicy="no-referrer"
+        />
+      ) : (
+        <div class="flex h-36 w-full flex-col items-center justify-center gap-1 text-center text-sm text-slate-400">
+          <span class="text-2xl opacity-40" aria-hidden="true">◇</span>
+          <span>Нет фото</span>
+        </div>
+      )
+    }
+  </div>
+</a>

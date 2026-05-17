@@ -3,6 +3,10 @@ export interface CatalogCategory {
   title: string;
   parentPath: string | null;
   slug: string;
+  /** Превью раздела с сайта-источника (парсер) или пусто — тогда подставляем фото из товаров */
+  image?: string;
+  /** Порядок среди соседних разделов (как в разметке родительской страницы каталога источника) */
+  sortHint?: number;
 }
 
 export interface CatalogProduct {

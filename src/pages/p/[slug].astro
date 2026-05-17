@@ -1,7 +1,7 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import AddToCartButton from "../../components/AddToCartButton.astro";
-import { catalog, normalizePath } from "../../utils/catalog";
+import { catalog, normalizePath, productPrimaryImage } from "../../utils/catalog";
 import type { CatalogCategory } from "../../types/catalog";
 import { baseUrl } from "../../utils/baseUrl";
 
@@ -34,6 +34,8 @@ function breadcrumbForProduct(categoryPath: string): CatalogCategory[] {
 
 const chain = breadcrumbForProduct(product.categoryPath);
 const sku = product.properties["Артикул"] ?? "";
+const primaryImg = productPrimaryImage(product);
+const galleryImages = product.images.length ? product.images : primaryImg ? [primaryImg] : [];
 ---
 
 <Layout
@@ -64,10 +66,16 @@ const sku = product.properties["Артикул"] ?? "";
       <div class="reveal space-y-4">
         <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           {
-            product.images.length ? (
+            galleryImages.length ? (
               <div class="grid gap-4 sm:grid-cols-2">
-                {product.images.map((src) => (
-                  <img src={src} alt="" class="max-h-72 w-full rounded-2xl bg-slate-50 object-contain p-4" loading="lazy" />
+                {galleryImages.map((src) => (
+                  <img
+                    src={src}
+                    alt=""
+                    class="max-h-72 w-full rounded-2xl bg-slate-50 object-contain p-4"
+                    loading="lazy"
+                    referrerpolicy="no-referrer"
+                  />
                 ))}
               </div>
             ) : (
@@ -91,7 +99,7 @@ const sku = product.properties["Артикул"] ?? "";
             <p class="mt-4 text-lg text-slate-600">Розничную цену уточняйте у менеджера.</p>
           )}
           <div class="mt-6 max-w-md">
-            <AddToCartButton slug={product.slug} title={product.title} sku={sku} image={product.image} />
+            <AddToCartButton slug={product.slug} title={product.title} sku={sku} image={primaryImg} />
           </div>
         </div>
 
