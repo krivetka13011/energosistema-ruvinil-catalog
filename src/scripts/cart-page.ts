@@ -21,7 +21,7 @@ function renderList() {
   const checkout = document.getElementById("cart-checkout-panel");
   if (!items.length) {
     root.innerHTML =
-      '<p class="text-slate-600">Корзина пуста. Выберите товары в каталоге и нажмите «В корзину».</p>';
+      '<p class="text-slate-600">Корзина пуста. Выберите товары в каталоге и нажмите «Добавить товар в корзину».</p>';
     if (checkout) checkout.classList.add("hidden");
     return;
   }

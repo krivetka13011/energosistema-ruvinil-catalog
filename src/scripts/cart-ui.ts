@@ -19,12 +19,11 @@ function parsePayload(btn: HTMLElement): Omit<CartLine, "qty" | "addedAt"> | nul
 
 function labelFor(btn: HTMLElement, qty: number) {
   const label = btn.querySelector("[data-cart-label]");
-  const hint = btn.querySelector("[data-cart-hint]");
-  if (label) label.textContent = qty > 0 ? `В корзине: ${qty}` : "В корзину";
-  if (hint) hint.textContent = qty > 0 ? "Нажмите, чтобы добавить ещё одну единицу" : "Оформление на странице корзины";
+  if (label) {
+    label.textContent =
+      qty > 0 ? `В корзине: ${qty}` : "Добавить товар в корзину";
+  }
   btn.setAttribute("aria-pressed", qty > 0 ? "true" : "false");
-  btn.classList.toggle("bg-brand-50", qty > 0);
-  btn.classList.toggle("border-brand-400/60", qty > 0);
 }
 
 export function refreshCartButtonLabels() {

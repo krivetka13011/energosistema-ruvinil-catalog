@@ -12,21 +12,21 @@ const { href, title, image = "", subtitle } = Astro.props;
 
 <a
   href={href}
-  class="group flex h-[340px] w-full flex-col overflow-hidden rounded-2xl border border-sky-200/80 bg-sky-100/95 shadow-sm outline-none transition hover:border-sky-300 hover:bg-sky-50 hover:shadow-md focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 focus-visible:ring-offset-[#2a6a9e]"
+  class="group flex h-[388px] w-full flex-col overflow-hidden rounded-2xl border border-sky-200/80 bg-sky-100/95 shadow-sm outline-none transition hover:border-sky-300 hover:bg-sky-50 hover:shadow-md focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 focus-visible:ring-offset-[#2a6a9e]"
 >
-  <div class="flex h-[120px] shrink-0 flex-col px-4 pb-2 pt-5">
+  <div class="flex h-[168px] min-h-0 shrink-0 flex-col px-4 pb-3 pt-5">
     <h2
-      class="line-clamp-3 font-display text-lg font-semibold leading-snug text-brand-950 group-hover:text-brand-800 md:text-xl"
+      class="line-clamp-4 font-display text-lg font-semibold leading-snug text-brand-950 group-hover:text-brand-800 md:text-xl"
     >
       {title}
     </h2>
     {
       subtitle ? (
-        <p class="mt-2 line-clamp-2 text-sm text-slate-600">{subtitle}</p>
+        <p class="mt-2 line-clamp-2 shrink-0 text-sm leading-snug text-slate-600">{subtitle}</p>
       ) : null
     }
   </div>
-  <!-- Только зона фото: без изменения высоты карточки (220px), превью прижато к низу как у ruvinil -->
+  <!-- Только зона фото: превью прижато к низу как у ruvinil -->
   <div class="relative h-[220px] shrink-0 bg-white">
     {
       image ? (
