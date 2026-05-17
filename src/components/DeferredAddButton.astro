@@ -1,0 +1,28 @@
+---
+interface Props {
+  slug: string;
+  title: string;
+  sku: string;
+  image?: string;
+  class?: string;
+}
+
+const { slug, title, sku, image = "", class: className = "" } = Astro.props;
+const payload = Buffer.from(JSON.stringify({ slug, title, sku, image })).toString("base64");
+---
+
+<button
+  type="button"
+  data-deferred-add
+  data-item={payload}
+  class:list={[
+    "flex w-full flex-col items-stretch gap-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-left text-sm font-semibold text-brand-900 shadow-sm transition hover:border-brand-600/40 hover:bg-slate-50",
+    className,
+  ]}
+  aria-pressed="false"
+>
+  <span data-deferred-label>Отложить</span>
+  <span data-deferred-hint class="text-[11px] font-normal font-sans text-slate-500">
+    Сохраняется только в браузере
+  </span>
+</button>

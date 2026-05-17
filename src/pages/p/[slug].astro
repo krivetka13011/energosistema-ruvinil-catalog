@@ -1,5 +1,6 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import DeferredAddButton from "../../components/DeferredAddButton.astro";
 import { catalog, normalizePath } from "../../utils/catalog";
 import type { CatalogCategory } from "../../types/catalog";
 import { baseUrl } from "../../utils/baseUrl";
@@ -90,6 +91,9 @@ const sku = product.properties["Артикул"] ?? "";
           {product.priceHint ? <p class="mt-4 text-2xl font-semibold text-brand-900">{product.priceHint}</p> : (
             <p class="mt-4 text-lg text-slate-600">Розничную цену уточняйте у менеджера.</p>
           )}
+          <div class="mt-6 max-w-md">
+            <DeferredAddButton slug={product.slug} title={product.title} sku={sku} image={product.image} />
+          </div>
         </div>
 
         <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
