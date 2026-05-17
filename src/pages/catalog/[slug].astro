@@ -10,6 +10,7 @@ import {
   descendantProducts,
   normalizePath,
   productsInCategory,
+  sortProductsBySupplierListing,
 } from "../../utils/catalog";
 import { baseUrl } from "../../utils/baseUrl";
 
@@ -43,7 +44,7 @@ function breadcrumbChain(category: CatalogCategory): CatalogCategory[] {
 
 const chain = breadcrumbChain(cat);
 const children = childCategoriesOrdered(catalog.categories, cat.pathname);
-const direct = productsInCategory(catalog.products, cat.pathname);
+const direct = sortProductsBySupplierListing(productsInCategory(catalog.products, cat.pathname));
 const inTree = descendantProducts(catalog.products, cat.pathname);
 ---
 

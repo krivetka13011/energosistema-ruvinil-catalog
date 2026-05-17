@@ -20,6 +20,10 @@ export interface CatalogProduct {
   priceHint: string;
   availability: string;
   listingPage: string;
+  /** Номер страницы Bitrix (PAGEN_1=N), 1 если без параметра */
+  listingPageIndex?: number;
+  /** Позиция в листинге сверху вниз, как у поставщика */
+  listingPosition?: number;
   categoryPath: string;
   descriptionHtml: string;
 }

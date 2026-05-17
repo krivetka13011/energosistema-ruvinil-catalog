@@ -5,10 +5,8 @@
 ## Команды
 
 - `npm run dev` — локальный предпросмотр (перед первым запуском создаётся `catalog.json` из образца, если файла нет).
-- `npm run scrape` — обход каталога [ruvinil.ru/catalog](https://www.ruvinil.ru/catalog/), запись в `src/data/catalog.json`.
-  - Умеренная нагрузка: пауза между запросами `SCRAPE_DELAY_MS` (по умолчанию 450 мс).
-  - Лимит страниц: `SCRAPE_MAX_PAGES` (по умолчанию 600).
-  - Полные HTML-описания и галерея с карточки товара: `node scraper/scrape.mjs --details` (значительно дольше).
+- `npm run scrape` — полный обход [ruvinil.ru/catalog](https://www.ruvinil.ru/catalog/) и подразделов; в `catalog.json` те же названия, дерево разделов, товары и порядок позиций, что у поставщика (интерфейс сайта свой). Опционально: `SCRAPE_DELAY_MS`, для короткого теста — `SCRAPE_MAX_PAGES`.
+- `npm run scrape:full` — то же + с каждой карточки товара: полное описание, галерея и все характеристики из `.product-detail` (эквивалентно `node scraper/scrape.mjs --details`).
 - `npm run build` — сборка в `dist/`.
 
 Пример быстрого прогона под Windows PowerShell:

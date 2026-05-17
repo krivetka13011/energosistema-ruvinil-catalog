@@ -51,6 +51,16 @@ export function descendantProducts(products: CatalogProduct[], categoryPath: str
   return products.filter((p) => normalizePath(p.categoryPath).startsWith(prefix));
 }
 
+/** Порядок позиций как в листинге на ruvinil.ru (страница пагинации → порядок на странице). */
+export function sortProductsBySupplierListing(products: CatalogProduct[]) {
+  return [...products].sort((a, b) => {
+    const pa = a.listingPageIndex ?? 1;
+    const pb = b.listingPageIndex ?? 1;
+    if (pa !== pb) return pa - pb;
+    return (a.listingPosition ?? 0) - (b.listingPosition ?? 0);
+  });
+}
+
 /** Дочерние разделы: порядок как на сайте-источнике (sortHint), затем по названию. */
 export function childCategoriesOrdered(categories: CatalogCategory[], parentPath: string | null) {
   const p = parentPath ? normalizePath(parentPath) : "/catalog/";

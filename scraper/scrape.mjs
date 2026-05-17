@@ -2,6 +2,12 @@ import * as cheerio from "cheerio";
 import fs from "fs/promises";
 import path from "path";
 
+/**
+ * Зеркало каталога https://www.ruvinil.ru/catalog/ : те же разделы/подразделы (иерархия и названия),
+ * те же товары в узлах, порядок как в листинге, полные характеристики и описание — с флагом --details.
+ * Оформление сайта (UI) своё, источник данных только страницы поставщика.
+ */
+
 const BASE = "https://www.ruvinil.ru";
 const UA =
   "Mozilla/5.0 (compatible; RetailCatalogBot/1.0; +mailto:zakaz@en-msk.ru) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
@@ -24,6 +30,33 @@ function normalizeCatalogPath(pathname) {
   if (!pathname.startsWith("/catalog")) return null;
   const withSlash = pathname.endsWith("/") ? pathname : `${pathname}/`;
   return withSlash.replace(/\/{2,}/g, "/");
+}
+
+/** Номер страницы листинга Bitrix (?PAGEN_1=N), без параметра — 1 */
+function listingPageIndex(pageUrl) {
+  try {
+    const u = new URL(pageUrl);
+    for (const [k, v] of u.searchParams.entries()) {
+      if (/^PAGEN_\d+$/.test(k)) {
+        const n = Number.parseInt(v, 10);
+        if (Number.isFinite(n) && n >= 1) return n;
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+  return 1;
+}
+
+function sortProductsSupplierOrder(items) {
+  return [...items].sort((a, b) => {
+    const c = a.categoryPath.localeCompare(b.categoryPath, "ru");
+    if (c !== 0) return c;
+    const pa = a.listingPageIndex ?? 1;
+    const pb = b.listingPageIndex ?? 1;
+    if (pa !== pb) return pa - pb;
+    return (a.listingPosition ?? 0) - (b.listingPosition ?? 0);
+  });
 }
 
 async function fetchHtml(url) {
@@ -119,9 +152,10 @@ function extractProducts(html, pageUrl) {
   const $ = cheerio.load(html);
   const listingPath =
     normalizeCatalogPath(new URL(pageUrl).pathname) ?? "/catalog/";
+  const pageIdx = listingPageIndex(pageUrl);
   /** @type {any[]} */
   const items = [];
-  $(".catalog-product-outer").each((_, outer) => {
+  $(".catalog-product-outer").each((idx, outer) => {
     const box = $(outer).find(".catalog-product").first();
     const titleA = box.find(".product-bottom a.product-title").first();
     const href = titleA.attr("href");
@@ -167,6 +201,8 @@ function extractProducts(html, pageUrl) {
       priceHint,
       availability,
       listingPage: pageUrl,
+      listingPageIndex: pageIdx,
+      listingPosition: idx,
       categoryPath: listingPath,
     });
   });
@@ -200,8 +236,17 @@ async function enrichProductDetails(product) {
   const html = await fetchHtml(product.url);
   const $ = cheerio.load(html);
   const desc = $(".product-description").first().html()?.trim() ?? "";
+
+  /** @type {Record<string, string>} */
+  const detailProps = {};
+  $(".product-detail .product-property").each((_, prop) => {
+    const name = $(prop).find(".product-property-name").first().text().replace(/:\s*$/, "").trim();
+    const value = $(prop).find(".product-property-value").first().text().trim();
+    if (name && value) detailProps[name] = value;
+  });
+
   const images = [];
-  $(".product-images img").each((_, el) => {
+  $(".product-detail .product-images img, .product-images img").each((_, el) => {
     const src = $(el).attr("src") || $(el).attr("data-src") || "";
     if (!src) return;
     try {
@@ -212,7 +257,14 @@ async function enrichProductDetails(product) {
     }
   });
   const uniq = [...new Set(images)];
-  return { descriptionHtml: desc, images: uniq.length ? uniq : product.image ? [product.image] : [] };
+  const properties =
+    Object.keys(detailProps).length > 0 ? detailProps : product.properties || {};
+
+  return {
+    descriptionHtml: desc,
+    images: uniq.length ? uniq : product.image ? [product.image] : [],
+    properties,
+  };
 }
 
 async function main() {
@@ -268,8 +320,7 @@ async function main() {
   }
 
   /** @type {any[]} */
-  let list = [...products.values()];
-  list.sort((a, b) => a.title.localeCompare(b.title, "ru"));
+  let list = sortProductsSupplierOrder([...products.values()]);
 
   if (WITH_DETAILS) {
     console.error(`Fetching details for ${list.length} products…`);
@@ -280,6 +331,7 @@ async function main() {
         const extra = await enrichProductDetails(p);
         p.descriptionHtml = extra.descriptionHtml;
         p.images = extra.images;
+        p.properties = extra.properties;
       } catch (e) {
         console.error(`Detail fail ${p.url}: ${e.message}`);
         p.descriptionHtml = "";
