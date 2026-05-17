@@ -56,4 +56,33 @@
   .supplier-color-photo[src^="data:image/svg+xml"] {
     filter: none;
   }
+
+  /**
+   * Превью в карточке раздела (главная / корень каталога): только картинка.
+   * Низ + центр по горизонтали, без обрезки (как .catalog-section-item img по смыслу).
+   */
+  .supplier-category-photo {
+    display: block;
+    max-height: 100%;
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    margin-left: auto;
+    margin-right: auto;
+    object-fit: contain;
+    object-position: center bottom;
+    transform-origin: bottom center;
+    filter: saturate(1);
+  }
+
+  .supplier-category-photo[src^="data:image/svg+xml"] {
+    filter: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .supplier-category-photo {
+      transition: none !important;
+      transform: none !important;
+    }
+  }
 }

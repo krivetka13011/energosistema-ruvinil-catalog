@@ -26,21 +26,24 @@ const { href, title, image = "", subtitle } = Astro.props;
       ) : null
     }
   </div>
-  <div class="flex h-[220px] shrink-0 items-center justify-center bg-white px-4 py-6">
+  <!-- Только зона фото: без изменения высоты карточки (220px), превью прижато к низу как у ruvinil -->
+  <div class="relative h-[220px] shrink-0 bg-white">
     {
       image ? (
-        <img
-          src={image}
-          alt=""
-          width={280}
-          height={200}
-          class="supplier-color-photo max-h-full max-w-full object-contain object-bottom transition duration-300 group-hover:scale-[1.02]"
-          loading="lazy"
-          decoding="async"
-          referrerpolicy="no-referrer"
-        />
+        <div class="absolute inset-x-3 inset-y-2 flex flex-col justify-end">
+          <img
+            src={image}
+            alt=""
+            width={280}
+            height={200}
+            class="supplier-category-photo motion-safe:transition motion-safe:duration-300 motion-safe:group-hover:scale-[1.02]"
+            loading="lazy"
+            decoding="async"
+            referrerpolicy="no-referrer"
+          />
+        </div>
       ) : (
-        <div class="flex h-full w-full flex-col items-center justify-center gap-1 text-center text-sm text-slate-400">
+        <div class="flex h-full items-center justify-center gap-1 text-center text-sm text-slate-400">
           <span class="text-2xl opacity-40" aria-hidden="true">◇</span>
           <span>Нет фото</span>
         </div>
