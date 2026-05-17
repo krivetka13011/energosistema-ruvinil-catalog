@@ -5,7 +5,7 @@ import {
   catalog,
   categoryRepresentativeImage,
   childCategoriesOrdered,
-  descendantProducts,
+  productsInCategoryTree,
 } from "../../utils/catalog";
 import { baseUrl } from "../../utils/baseUrl";
 
@@ -47,7 +47,7 @@ const roots = childCategoriesOrdered(catalog.categories, "/catalog/");
     </div>
 
     <div class="mx-auto max-w-7xl px-4 pb-14 md:pb-20">
-      <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div class="grid items-start gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {
           roots.map((c) => (
             <div class="reveal text-slate-900">
@@ -55,7 +55,7 @@ const roots = childCategoriesOrdered(catalog.categories, "/catalog/");
                 href={baseUrl(`/catalog/${c.slug}/`)}
                 title={c.title}
                 image={categoryRepresentativeImage(catalog.categories, catalog.products, c.pathname)}
-                subtitle={`${descendantProducts(catalog.products, c.pathname).length} позиций`}
+                subtitle={`${productsInCategoryTree(catalog.products, catalog.categories, c.pathname).length} позиций`}
               />
             </div>
           ))

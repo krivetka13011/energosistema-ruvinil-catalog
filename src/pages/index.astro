@@ -6,7 +6,7 @@ import {
   catalog,
   categoryRepresentativeImage,
   childCategoriesOrdered,
-  descendantProducts,
+  productsInCategoryTree,
 } from "../utils/catalog";
 import { baseUrl } from "../utils/baseUrl";
 
@@ -88,7 +88,7 @@ const total = catalog.products.length;
       </div>
       <a href={baseUrl("/catalog/")} class="text-sm font-semibold text-brand-700 hover:underline">Все разделы →</a>
     </div>
-    <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div class="mt-10 grid items-start gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {
         roots.map((c) => (
           <div class="reveal">
@@ -96,7 +96,7 @@ const total = catalog.products.length;
               href={baseUrl(`/catalog/${c.slug}/`)}
               title={c.title}
               image={categoryRepresentativeImage(catalog.categories, catalog.products, c.pathname)}
-              subtitle={`${descendantProducts(catalog.products, c.pathname).length} поз.`}
+              subtitle={`${productsInCategoryTree(catalog.products, catalog.categories, c.pathname).length} поз.`}
             />
           </div>
         ))

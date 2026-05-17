@@ -21,7 +21,7 @@ export function categoryRepresentativeImage(
   const cat = categories.find((c) => normalizePath(c.pathname) === norm);
   const fromCat = cat?.image?.trim();
   if (fromCat) return fromCat;
-  for (const p of descendantProducts(products, categoryPathname)) {
+  for (const p of productsInCategoryTree(products, categories, categoryPathname)) {
     const img = productPrimaryImage(p);
     if (img) return img;
   }
@@ -46,9 +46,36 @@ export function productsInCategory(products: CatalogProduct[], categoryPath: str
   return products.filter((p) => normalizePath(p.categoryPath) === cp);
 }
 
-export function descendantProducts(products: CatalogProduct[], categoryPath: string) {
-  const prefix = normalizePath(categoryPath);
-  return products.filter((p) => normalizePath(p.categoryPath).startsWith(prefix));
+/** Pathname всех узлов поддерева (корень включительно) по parentPath — как в меню поставщика. */
+export function descendantCategoryPathSet(categories: CatalogCategory[], rootPathname: string): Set<string> {
+  const normRoot = normalizePath(rootPathname);
+  const byParent = new Map<string, CatalogCategory[]>();
+  for (const c of categories) {
+    const parent = normalizePath((c.parentPath ?? "/catalog/") as string);
+    if (!byParent.has(parent)) byParent.set(parent, []);
+    byParent.get(parent)!.push(c);
+  }
+  const out = new Set<string>();
+  const stack = [normRoot];
+  while (stack.length) {
+    const cur = stack.pop()!;
+    if (out.has(cur)) continue;
+    out.add(cur);
+    for (const child of byParent.get(cur) ?? []) {
+      stack.push(normalizePath(child.pathname));
+    }
+  }
+  return out;
+}
+
+/** Товары узла и всех вложенных разделов (не по префиксу URL — у поставщика дочерние пути не всегда «подстрока» родителя). */
+export function productsInCategoryTree(
+  products: CatalogProduct[],
+  categories: CatalogCategory[],
+  rootPathname: string,
+): CatalogProduct[] {
+  const paths = descendantCategoryPathSet(categories, rootPathname);
+  return products.filter((p) => paths.has(normalizePath(p.categoryPath)));
 }
 
 /** Порядок позиций как в листинге на ruvinil.ru (страница пагинации → порядок на странице). */
