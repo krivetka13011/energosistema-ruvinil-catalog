@@ -2,6 +2,7 @@
 import "../styles/global.css";
 import { ViewTransitions } from "astro:transitions";
 import type { CatalogPayload } from "../types/catalog";
+import { baseUrl } from "../utils/baseUrl";
 
 interface Props {
   title: string;
@@ -32,7 +33,7 @@ const { company } = catalog;
   <body class="min-h-screen flex flex-col">
     <header class="sticky top-0 z-40 border-b border-white/10 bg-brand-900/95 backdrop-blur-md text-white shadow-soft">
       <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 md:py-4">
-        <a href="/" class="group flex items-center gap-3">
+        <a href={baseUrl("/")} class="group flex items-center gap-3">
           <span
             class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 font-display text-lg font-bold ring-1 ring-white/20 transition group-hover:bg-white/15"
             aria-hidden="true"
@@ -46,8 +47,8 @@ const { company } = catalog;
           </div>
         </a>
         <nav class="hidden items-center gap-6 text-sm font-medium md:flex" aria-label="Основное меню">
-          <a href="/catalog/" class="transition hover:text-red-200">Каталог</a>
-          <a href="/contacts/" class="transition hover:text-red-200">Контакты</a>
+          <a href={baseUrl("/catalog/")} class="transition hover:text-red-200">Каталог</a>
+          <a href={baseUrl("/contacts/")} class="transition hover:text-red-200">Контакты</a>
           <a
             href={`tel:${company.contacts.phone.replace(/[^\d+]/g, "")}`}
             class="rounded-full bg-accent px-4 py-2 text-white shadow-soft transition hover:bg-accent-hover"

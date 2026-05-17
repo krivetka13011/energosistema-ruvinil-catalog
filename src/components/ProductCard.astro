@@ -1,5 +1,6 @@
 ---
 import type { CatalogProduct } from "../types/catalog";
+import { baseUrl } from "../utils/baseUrl";
 
 interface Props {
   product: CatalogProduct;
@@ -10,7 +11,7 @@ const sku = product.properties["Артикул"] ?? "";
 ---
 
 <a
-  href={`/p/${product.slug}/`}
+  href={baseUrl(`/p/${product.slug}/`)}
   class="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:border-brand-600/25 hover:shadow-soft reveal"
 >
   <div class="relative aspect-[4/3] overflow-hidden bg-slate-100">

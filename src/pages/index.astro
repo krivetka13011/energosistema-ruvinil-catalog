@@ -2,6 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import ProductCard from "../components/ProductCard.astro";
 import { catalog, childCategories, descendantProducts } from "../utils/catalog";
+import { baseUrl } from "../utils/baseUrl";
 
 const roots = childCategories(catalog.categories, "/catalog/");
 const featured = [...catalog.products].sort((a, b) => a.slug.localeCompare(b.slug, "ru")).slice(0, 8);
@@ -27,13 +28,13 @@ const total = catalog.products.length;
         </p>
         <div class="flex flex-wrap gap-3">
           <a
-            href="/catalog/"
+            href={baseUrl("/catalog/")}
             class="rounded-full bg-white px-6 py-3 font-semibold text-brand-900 shadow-soft transition hover:bg-slate-100"
           >
             Открыть каталог
           </a>
           <a
-            href="/contacts/"
+            href={baseUrl("/contacts/")}
             class="rounded-full border border-white/30 px-6 py-3 font-semibold text-white transition hover:bg-white/10"
           >
             Контакты
@@ -73,13 +74,13 @@ const total = catalog.products.length;
           Структура повторяет официальный каталог производителя — удобно переносить привычную навигацию в розницу.
         </p>
       </div>
-      <a href="/catalog/" class="text-sm font-semibold text-brand-700 hover:underline">Все разделы →</a>
+      <a href={baseUrl("/catalog/")} class="text-sm font-semibold text-brand-700 hover:underline">Все разделы →</a>
     </div>
     <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {
         roots.map((c) => (
           <a
-            href={`/catalog/${c.slug}/`}
+            href={baseUrl(`/catalog/${c.slug}/`)}
             class="reveal group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-brand-600/30 hover:shadow-soft"
           >
             <div class="font-display text-lg font-semibold text-brand-900 group-hover:text-brand-700">{c.title}</div>
@@ -99,7 +100,7 @@ const total = catalog.products.length;
           <h2 class="font-display text-3xl font-bold text-brand-950">Подборка из каталога</h2>
           <p class="mt-2 text-slate-600">Случайные позиции после последнего обновления данных.</p>
         </div>
-        <a href="/catalog/" class="text-sm font-semibold text-brand-700 hover:underline">Перейти в каталог →</a>
+        <a href={baseUrl("/catalog/")} class="text-sm font-semibold text-brand-700 hover:underline">Перейти в каталог →</a>
       </div>
       <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {featured.map((p) => (

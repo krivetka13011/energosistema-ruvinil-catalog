@@ -23,7 +23,9 @@ $env:SCRAPE_MAX_PAGES="120"; $env:SCRAPE_DELAY_MS="400"; node scraper/scrape.mjs
 
 ### GitHub Pages
 
-Включите **Settings → Pages → GitHub Actions**. Workflow `.github/workflows/deploy-pages.yml`. Переменная репозитория **`PUBLIC_SITE_URL`**.
+Включите **Settings → Pages → GitHub Actions**. Workflow `.github/workflows/deploy-pages.yml`. Переменная **`PUBLIC_SITE_URL`** — полный URL сайта с `https://`.
+
+На GitHub Actions для репозитория-проекта путь сайта вида `https://user.github.io/имя-репо/` — в сборке автоматически выставляется **`base`**, чтобы загружались стили и скрипты. Локально `npm run dev` работает как обычно.
 
 ### Cloudflare Pages
 

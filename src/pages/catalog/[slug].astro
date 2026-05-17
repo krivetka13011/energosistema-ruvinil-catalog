@@ -9,6 +9,7 @@ import {
   normalizePath,
   productsInCategory,
 } from "../../utils/catalog";
+import { baseUrl } from "../../utils/baseUrl";
 
 export function getStaticPaths() {
   return catalog.categories.map((c) => ({ params: { slug: c.slug } }));
@@ -52,9 +53,9 @@ const inTree = descendantProducts(catalog.products, cat.pathname);
   <section class="border-b border-slate-200 bg-white">
     <div class="mx-auto max-w-6xl px-4 py-10">
       <nav class="reveal flex flex-wrap gap-x-2 gap-y-1 text-sm text-slate-500">
-        <a href="/" class="hover:text-brand-700">Главная</a>
+        <a href={baseUrl("/")} class="hover:text-brand-700">Главная</a>
         <span>/</span>
-        <a href="/catalog/" class="hover:text-brand-700">Каталог</a>
+        <a href={baseUrl("/catalog/")} class="hover:text-brand-700">Каталог</a>
         {
           chain.map((c, i) => (
             <>
@@ -62,7 +63,7 @@ const inTree = descendantProducts(catalog.products, cat.pathname);
               {i === chain.length - 1 ? (
                 <span class="text-slate-800">{c.title}</span>
               ) : (
-                <a href={`/catalog/${c.slug}/`} class="hover:text-brand-700">
+                <a href={baseUrl(`/catalog/${c.slug}/`)} class="hover:text-brand-700">
                   {c.title}
                 </a>
               )}
@@ -86,7 +87,7 @@ const inTree = descendantProducts(catalog.products, cat.pathname);
           <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {children.map((c) => (
               <a
-                href={`/catalog/${c.slug}/`}
+                href={baseUrl(`/catalog/${c.slug}/`)}
                 class="reveal rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-brand-600/25 hover:shadow-soft"
               >
                 <div class="font-display text-lg font-semibold text-brand-900">{c.title}</div>

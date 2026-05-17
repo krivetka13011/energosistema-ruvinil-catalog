@@ -2,6 +2,7 @@
 import Layout from "../../layouts/Layout.astro";
 import { catalog, normalizePath } from "../../utils/catalog";
 import type { CatalogCategory } from "../../types/catalog";
+import { baseUrl } from "../../utils/baseUrl";
 
 export function getStaticPaths() {
   return catalog.products.map((p) => ({ params: { slug: p.slug } }));
@@ -41,14 +42,14 @@ const sku = product.properties["Артикул"] ?? "";
 >
   <article class="mx-auto max-w-6xl px-4 py-12">
     <nav class="reveal flex flex-wrap gap-x-2 gap-y-1 text-sm text-slate-500">
-      <a href="/" class="hover:text-brand-700">Главная</a>
+      <a href={baseUrl("/")} class="hover:text-brand-700">Главная</a>
       <span>/</span>
-      <a href="/catalog/" class="hover:text-brand-700">Каталог</a>
+      <a href={baseUrl("/catalog/")} class="hover:text-brand-700">Каталог</a>
       {
         chain.map((c) => (
           <>
             <span>/</span>
-            <a href={`/catalog/${c.slug}/`} class="hover:text-brand-700">
+            <a href={baseUrl(`/catalog/${c.slug}/`)} class="hover:text-brand-700">
               {c.title}
             </a>
           </>
