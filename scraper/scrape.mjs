@@ -92,17 +92,83 @@ async function fetchHtml(url) {
 function extractPaginationUrls(html, pageUrl) {
   const $ = cheerio.load(html);
   const out = new Set();
+  let curPathNorm;
+  try {
+    curPathNorm = normalizeCatalogPath(new URL(pageUrl).pathname);
+  } catch {
+    return [];
+  }
+  if (!curPathNorm) return [];
+
   $('a[href*="PAGEN_"]').each((_, el) => {
     const href = $(el).attr("href");
     if (!href) return;
     try {
-      const abs = new URL(href, pageUrl).href;
-      if (abs.includes(`${BASE}/catalog/`)) out.add(abs.split("#")[0]);
+      const abs = new URL(href, pageUrl).href.split("#")[0];
+      if (!abs.includes(`${BASE}/catalog/`)) return;
+      const u = new URL(abs);
+      if (normalizeCatalogPath(u.pathname) !== curPathNorm) return;
+      out.add(abs);
     } catch {
       /* ignore */
     }
   });
+
+  let maxPage = 1;
+  /** @type {string} */
+  let paramKey = "PAGEN_1";
+  for (const link of out) {
+    const u = new URL(link);
+    for (const [k, v] of u.searchParams.entries()) {
+      if (!/^PAGEN_\d+$/.test(k)) continue;
+      paramKey = k;
+      const n = Number.parseInt(v, 10);
+      if (Number.isFinite(n) && n > maxPage) maxPage = n;
+    }
+  }
+
+  for (const m of html.matchAll(/PAGEN_(\d+)=(\d+)/g)) {
+    const k = `PAGEN_${m[1]}`;
+    const n = Number.parseInt(m[2], 10);
+    if (Number.isFinite(n) && n > maxPage) {
+      maxPage = n;
+      paramKey = k;
+    }
+  }
+
+  const SAFE_MAX_PAGES = 600;
+  if (maxPage > SAFE_MAX_PAGES) {
+    console.error(`Pagination для ${curPathNorm}: обрезано ${maxPage} → ${SAFE_MAX_PAGES} (страховка)`);
+    maxPage = SAFE_MAX_PAGES;
+  }
+    try {
+      const base = new URL(pageUrl);
+      base.hash = "";
+      base.search = "";
+      let baseHref = base.href;
+      if (!baseHref.endsWith("/")) baseHref = `${baseHref}/`;
+      for (let n = 2; n <= maxPage; n++) {
+        const syn = `${baseHref}?${paramKey}=${n}`;
+        const u = new URL(syn);
+        if (normalizeCatalogPath(u.pathname) === curPathNorm) out.add(u.href.split("#")[0]);
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
   return [...out];
+}
+
+function dedupeSectionsByPath(sections) {
+  const seen = new Set();
+  const out = [];
+  for (const s of sections) {
+    if (seen.has(s.pathname)) continue;
+    seen.add(s.pathname);
+    out.push(s);
+  }
+  return out;
 }
 
 /** Inline SVG карточки раздела (напр. «Заказные позиции») → data URL для поля image */
@@ -210,6 +276,7 @@ function extractProducts(html, pageUrl) {
 }
 
 function mergeCategoryMeta(parentUrl, sections) {
+  if (listingPageIndex(parentUrl) !== 1) return;
   const parentPath = normalizeCatalogPath(new URL(parentUrl).pathname);
   sections.forEach((s, idx) => {
     const existing = categoryMeta.get(s.pathname);
@@ -294,7 +361,7 @@ async function main() {
       continue;
     }
 
-    const sections = extractSectionLinks(html, url);
+    const sections = dedupeSectionsByPath(extractSectionLinks(html, url));
     mergeCategoryMeta(url, sections);
     for (const s of sections) {
       const u = `${BASE}${s.pathname}`;
