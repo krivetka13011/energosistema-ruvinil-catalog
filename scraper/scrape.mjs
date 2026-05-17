@@ -141,6 +141,8 @@ function extractPaginationUrls(html, pageUrl) {
     console.error(`Pagination для ${curPathNorm}: обрезано ${maxPage} → ${SAFE_MAX_PAGES} (страховка)`);
     maxPage = SAFE_MAX_PAGES;
   }
+
+  if (maxPage > 1) {
     try {
       const base = new URL(pageUrl);
       base.hash = "";
