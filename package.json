@@ -3,13 +3,14 @@
   "type": "module",
   "version": "1.0.0",
   "scripts": {
-    "predev": "node scraper/ensure-catalog.mjs",
+    "predev": "node scraper/ensure-catalog.mjs && node scripts/normalize-catalog-category-paths.mjs",
     "automation:check": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/check-automation.ps1",
     "scrape": "node scraper/scrape.mjs",
     "scrape:full": "node scraper/scrape.mjs --details",
     "scrape:quick": "cross-env SCRAPE_MAX_PAGES=12 SCRAPE_DELAY_MS=350 node scraper/scrape.mjs",
     "merge:prices": "node scripts/merge-price-list.mjs",
-    "prebuild": "node scraper/ensure-catalog.mjs && node scripts/build-search-index.mjs",
+    "normalize:catalog-paths": "node scripts/normalize-catalog-category-paths.mjs",
+    "prebuild": "node scraper/ensure-catalog.mjs && node scripts/normalize-catalog-category-paths.mjs && node scripts/build-search-index.mjs",
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview"

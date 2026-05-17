@@ -32,6 +32,20 @@ function normalizeCatalogPath(pathname) {
   return withSlash.replace(/\/{2,}/g, "/");
 }
 
+/** Папка категории по URL карточки товара (/catalog/раздел/товар/ → /catalog/раздел/). */
+function inferCategoryPathFromProductUrl(absProductUrl, fallbackListingPath) {
+  try {
+    const pathname = new URL(absProductUrl).pathname.replace(/\/{2,}/g, "/");
+    const trimmed = pathname.replace(/\/+$/, "");
+    const slash = trimmed.lastIndexOf("/");
+    if (slash <= 0) return fallbackListingPath;
+    const folder = `${trimmed.slice(0, slash)}/`;
+    return normalizeCatalogPath(folder) ?? fallbackListingPath;
+  } catch {
+    return fallbackListingPath;
+  }
+}
+
 /** Ключ параметра пагинации Bitrix (часто PAGEN_1) по разметке страницы */
 function inferPaginationParamKey(html) {
   const m = html.match(/PAGEN_(\d+)=\d+/);
@@ -288,7 +302,7 @@ function extractProducts(html, pageUrl) {
       listingPage: pageUrl,
       listingPageIndex: pageIdx,
       listingPosition: idx,
-      categoryPath: listingPath,
+      categoryPath: inferCategoryPathFromProductUrl(absUrl.split("#")[0], listingPath),
     });
   });
   return items;
