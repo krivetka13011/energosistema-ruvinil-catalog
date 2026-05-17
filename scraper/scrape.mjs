@@ -32,6 +32,23 @@ function normalizeCatalogPath(pathname) {
   return withSlash.replace(/\/{2,}/g, "/");
 }
 
+/** Ключ параметра пагинации Bitrix (часто PAGEN_1) по разметке страницы */
+function inferPaginationParamKey(html) {
+  const m = html.match(/PAGEN_(\d+)=\d+/);
+  return m ? `PAGEN_${m[1]}` : "PAGEN_1";
+}
+
+/** @type {Map<string, string>} */
+const lastListingProductSig = new Map();
+
+function listingPathKey(pageUrl) {
+  try {
+    return normalizeCatalogPath(new URL(pageUrl).pathname) ?? "";
+  } catch {
+    return "";
+  }
+}
+
 /** Номер страницы листинга Bitrix (?PAGEN_1=N), без параметра — 1 */
 function listingPageIndex(pageUrl) {
   try {
@@ -377,6 +394,28 @@ async function main() {
     const found = extractProducts(html, url);
     for (const p of found) {
       products.set(p.url, p);
+    }
+
+    const lk = listingPathKey(url);
+    const pi = listingPageIndex(url);
+    if (lk && lk !== "/catalog/" && found.length > 0 && pi < 650) {
+      const sig = found.map((x) => x.url).sort().join("|");
+      const prev = lastListingProductSig.get(lk);
+      if (!(prev === sig && pi > 1)) {
+        lastListingProductSig.set(lk, sig);
+        const paramKey = inferPaginationParamKey(html);
+        try {
+          const u = new URL(url);
+          u.hash = "";
+          u.search = "";
+          let baseHref = u.href;
+          if (!baseHref.endsWith("/")) baseHref = `${baseHref}/`;
+          const nextUrl = `${baseHref}?${paramKey}=${pi + 1}`;
+          if (!visited.has(nextUrl)) queue.push(nextUrl);
+        } catch {
+          /* ignore */
+        }
+      }
     }
 
     if (pages % 25 === 0) {

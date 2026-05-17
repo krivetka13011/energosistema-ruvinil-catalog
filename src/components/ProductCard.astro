@@ -49,6 +49,13 @@ const img = productPrimaryImage(product);
           <p class="text-sm text-slate-500">Оптовые цены уточняйте</p>
         )
       }
+      {
+        product.properties["Опт. прайс, руб."] && !product.slug.startsWith("price-list__") ? (
+          <p class="text-sm font-semibold text-brand-900">
+            Опт. по прайсу: {product.properties["Опт. прайс, руб."]} ₽
+          </p>
+        ) : null
+      }
       {product.availability ? <p class="text-xs text-emerald-700">{product.availability}</p> : null}
     </div>
   </a>

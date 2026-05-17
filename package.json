@@ -8,6 +8,7 @@
     "scrape": "node scraper/scrape.mjs",
     "scrape:full": "node scraper/scrape.mjs --details",
     "scrape:quick": "cross-env SCRAPE_MAX_PAGES=12 SCRAPE_DELAY_MS=350 node scraper/scrape.mjs",
+    "merge:prices": "node scripts/merge-price-list.mjs",
     "prebuild": "node scraper/ensure-catalog.mjs && node scripts/build-search-index.mjs",
     "dev": "astro dev",
     "build": "astro build",
@@ -21,6 +22,7 @@
   "devDependencies": {
     "cheerio": "^1.0.0",
     "cross-env": "^7.0.3",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "xlsx": "^0.18.5"
   }
 }
