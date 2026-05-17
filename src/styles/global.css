@@ -58,30 +58,22 @@
   }
 
   /**
-   * Превью в карточке раздела (главная / корень каталога): только картинка.
-   * Низ + центр по горизонтали, без обрезки (как .catalog-section-item img по смыслу).
+   * Превью раздела (растр): заполняем белую зону карточки без «паспарту» — cover + низ.
    */
   .supplier-category-photo {
     display: block;
-    max-height: 100%;
-    max-width: 100%;
-    width: auto;
-    height: auto;
-    margin-left: auto;
-    margin-right: auto;
-    object-fit: contain;
+    object-fit: cover;
     object-position: center bottom;
-    transform: scale(var(--category-photo-scale, 1));
     transform-origin: bottom center;
     filter: saturate(1);
     transition: transform 0.3s ease;
   }
 
   .group:hover .supplier-category-photo {
-    transform: scale(calc(var(--category-photo-scale, 1) * 1.02));
+    transform: scale(1.02);
   }
 
-  .supplier-category-photo[src^="data:image/svg+xml"] {
+  .supplier-category-svg-thumb {
     filter: none;
   }
 
