@@ -10,7 +10,7 @@ import {
   descendantProducts,
   normalizePath,
   productsInCategory,
-  sortProductsBySupplierListing,
+  sortProductsInCategoryTree,
 } from "../../utils/catalog";
 import { baseUrl } from "../../utils/baseUrl";
 
@@ -44,8 +44,9 @@ function breadcrumbChain(category: CatalogCategory): CatalogCategory[] {
 
 const chain = breadcrumbChain(cat);
 const children = childCategoriesOrdered(catalog.categories, cat.pathname);
-const direct = sortProductsBySupplierListing(productsInCategory(catalog.products, cat.pathname));
+const direct = productsInCategory(catalog.products, cat.pathname);
 const inTree = descendantProducts(catalog.products, cat.pathname);
+const shown = sortProductsInCategoryTree(inTree);
 ---
 
 <Layout
@@ -83,9 +84,27 @@ const inTree = descendantProducts(catalog.products, cat.pathname);
   </section>
 
   <section class="mx-auto max-w-6xl px-4 py-12">
+    <div>
+      <h2 class="reveal font-display text-xl font-semibold text-brand-900">Товары</h2>
+      {
+        shown.length === 0 ? (
+          <p class="reveal mt-4 text-sm text-slate-600">
+            В этом узле пока нет позиций в данных каталога — возможно, только подразделы или листинг ещё не собирался
+            парсером.
+          </p>
+        ) : (
+          <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {shown.map((p) => (
+              <ProductCard product={p} />
+            ))}
+          </div>
+        )
+      }
+    </div>
+
     {
       children.length ? (
-        <>
+        <div class="mt-14">
           <h2 class="reveal font-display text-xl font-semibold text-brand-900">Подразделы</h2>
           <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {children.map((c) => (
@@ -97,25 +116,8 @@ const inTree = descendantProducts(catalog.products, cat.pathname);
               />
             ))}
           </div>
-        </>
+        </div>
       ) : null
     }
-
-    <div class={children.length ? "mt-14" : ""}>
-      <h2 class="reveal font-display text-xl font-semibold text-brand-900">Товары в разделе</h2>
-      {
-        direct.length === 0 ? (
-          <p class="reveal mt-4 text-sm text-slate-600">
-            В этом узле только подразделы или данные ещё не подгружались парсером для этой страницы листинга.
-          </p>
-        ) : (
-          <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {direct.map((p) => (
-              <ProductCard product={p} />
-            ))}
-          </div>
-        )
-      }
-    </div>
   </section>
 </Layout>

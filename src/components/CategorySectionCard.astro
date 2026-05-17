@@ -20,7 +20,7 @@ const { href, title, image = "", subtitle } = Astro.props;
     </h2>
     {subtitle ? <p class="mt-2 text-sm text-slate-600">{subtitle}</p> : null}
   </div>
-  <div class="mt-auto flex min-h-[160px] flex-1 items-center justify-center bg-white px-4 py-6">
+  <div class="relative mt-auto aspect-[5/3] w-full overflow-hidden bg-gradient-to-b from-sky-50/90 to-sky-100/70">
     {
       image ? (
         <img
@@ -28,7 +28,7 @@ const { href, title, image = "", subtitle } = Astro.props;
           alt=""
           width={280}
           height={200}
-          class="supplier-color-photo max-h-44 w-full object-contain transition duration-300 group-hover:scale-[1.02]"
+          class="supplier-color-photo absolute inset-0 h-full w-full object-cover object-center transition duration-300 group-hover:scale-[1.03]"
           loading="lazy"
           decoding="async"
           referrerpolicy="no-referrer"
