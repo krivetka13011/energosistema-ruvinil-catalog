@@ -88,7 +88,7 @@ const shown = sortProductsInCategoryTree(inTree);
       children.length ? (
         <>
           <h2 class="reveal font-display text-xl font-semibold text-brand-900">Подразделы</h2>
-          <div class="mt-6 grid items-start gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {children.map((c) => (
               <CategorySectionCard
                 href={baseUrl(`/catalog/${c.slug}/`)}
