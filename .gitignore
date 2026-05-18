@@ -2,6 +2,7 @@ node_modules/
 dist/
 .astro/
 public/search-index.json
+public/cart-prices.json
 .env
 .env.*
 !.env.example

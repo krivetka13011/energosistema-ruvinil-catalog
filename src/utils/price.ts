@@ -4,10 +4,10 @@ import type { CatalogProduct } from "../types/catalog";
 export function parseFirstPositiveRub(text: string): number | null {
   const trimmed = text.replace(/\u00a0/g, " ").trim();
   if (!trimmed) return null;
-  const noSpaces = trimmed.replace(/\s+/g, "");
-  const m = noSpaces.match(/(\d+[.,]\d+|\d+)/);
+  const unified = trimmed.replace(/(\d)\s+(?=\d)/g, "$1");
+  const m = unified.match(/\d+[.,]\d+|\d+/);
   if (!m) return null;
-  const n = Number.parseFloat(m[1].replace(",", "."));
+  const n = Number.parseFloat(m[0].replace(",", "."));
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 

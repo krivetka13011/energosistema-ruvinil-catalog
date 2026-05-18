@@ -1,5 +1,5 @@
 import type { CartLine } from "./cart-storage";
-import { cartTotalQty, clearCart, readCart, removeLine, setQty } from "./cart-storage";
+import { cartTotalQty, clearCart, readCart, removeLine, setQty, writeCart } from "./cart-storage";
 import { formatRub } from "../utils/price";
 
 const listRootId = "cart-list-root";
@@ -14,6 +14,52 @@ function hrefProduct(slug: string) {
 
 function orderEmailFromDom(): string {
   return document.querySelector("[data-order-email]")?.getAttribute("data-order-email")?.trim() ?? "";
+}
+
+type CartPriceEntry = { u: number; d: string };
+
+let cartPricesMap: Record<string, CartPriceEntry> | null = null;
+
+async function loadCartPricesMap(): Promise<Record<string, CartPriceEntry>> {
+  if (cartPricesMap) return cartPricesMap;
+  try {
+    const base = import.meta.env.BASE_URL ?? "/";
+    const normalized = base.endsWith("/") ? base : `${base}/`;
+    const res = await fetch(`${normalized}cart-prices.json`);
+    if (!res.ok) throw new Error(String(res.status));
+    const json = (await res.json()) as { prices?: Record<string, CartPriceEntry> };
+    cartPricesMap = json.prices && typeof json.prices === "object" ? json.prices : {};
+    return cartPricesMap;
+  } catch {
+    cartPricesMap = {};
+    return cartPricesMap;
+  }
+}
+
+/** Подставляет цены из собранного каталога для строк, сохранённых без полей цены (старая корзина). */
+function enrichCartFromPriceMap(map: Record<string, CartPriceEntry>) {
+  const raw = readCart();
+  let changed = false;
+  const out = raw.map((it) => {
+    let next = { ...it };
+    const ext = map[next.slug];
+    if (ext && ext.u > 0) {
+      if (!(typeof next.unitPriceRub === "number" && next.unitPriceRub > 0)) {
+        next.unitPriceRub = ext.u;
+        changed = true;
+      }
+      if (!next.priceDisplay?.trim() && ext.d) {
+        next.priceDisplay = ext.d;
+        changed = true;
+      }
+    }
+    if ((typeof next.unitPriceRub === "number" && next.unitPriceRub > 0) && !next.priceDisplay?.trim()) {
+      next.priceDisplay = formatRub(next.unitPriceRub);
+      changed = true;
+    }
+    return next;
+  });
+  if (changed) writeCart(out);
 }
 
 function hasNumericPrice(it: { unitPriceRub?: number | null }): boolean {
@@ -227,9 +273,11 @@ function bindCheckout(orderEmail: string) {
   });
 }
 
-export function mountCartPage() {
+export async function mountCartPage() {
   const root = document.getElementById(listRootId);
   if (!root) return;
+  const map = await loadCartPricesMap();
+  enrichCartFromPriceMap(map);
   const email = orderEmailFromDom();
   root.removeEventListener("click", onListClick);
   root.addEventListener("click", onListClick);
@@ -241,10 +289,16 @@ export function mountCartPage() {
   renderList();
 }
 
-mountCartPage();
+void mountCartPage();
 
-document.addEventListener("astro:after-swap", mountCartPage);
+document.addEventListener("astro:after-swap", () => {
+  void mountCartPage();
+});
 
 window.addEventListener("cart-change", () => {
-  if (document.getElementById(listRootId)) renderList();
+  if (!document.getElementById(listRootId)) return;
+  void loadCartPricesMap().then((map) => {
+    enrichCartFromPriceMap(map);
+    renderList();
+  });
 });
