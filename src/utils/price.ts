@@ -24,11 +24,8 @@ export function formatRub(n: number): string {
 /** Витринная подпись цены относится к погонному метру. */
 export function isPricePerMeterHint(hint: string): boolean {
   const h = hint.toLowerCase().replace(/\u00a0/g, " ");
-  return (
-    /\bруб\.?\s*\/\s*м\b/.test(h) ||
-    /\b₽\s*\/\s*м\b/.test(h) ||
-    /\brub\.?\s*\/\s*m\b/i.test(h)
-  );
+  // Не использовать \b: для кириллицы границы «слова» в JS работают неверно.
+  return /руб\.?\s*\/\s*м/i.test(h) || /₽\s*\/\s*м/.test(h) || /rub\.?\s*\/\s*m/i.test(h);
 }
 
 /**

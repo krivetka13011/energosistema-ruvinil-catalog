@@ -18,21 +18,16 @@ function orderEmailFromDom(): string {
 
 type CartPriceEntry = { u: number; d: string };
 
-let cartPricesMap: Record<string, CartPriceEntry> | null = null;
-
 async function loadCartPricesMap(): Promise<Record<string, CartPriceEntry>> {
-  if (cartPricesMap) return cartPricesMap;
   try {
     const base = import.meta.env.BASE_URL ?? "/";
     const normalized = base.endsWith("/") ? base : `${base}/`;
-    const res = await fetch(`${normalized}cart-prices.json`);
+    const res = await fetch(`${normalized}cart-prices.json`, { cache: "no-store" });
     if (!res.ok) throw new Error(String(res.status));
     const json = (await res.json()) as { prices?: Record<string, CartPriceEntry> };
-    cartPricesMap = json.prices && typeof json.prices === "object" ? json.prices : {};
-    return cartPricesMap;
+    return json.prices && typeof json.prices === "object" ? json.prices : {};
   } catch {
-    cartPricesMap = {};
-    return cartPricesMap;
+    return {};
   }
 }
 
@@ -44,11 +39,12 @@ function enrichCartFromPriceMap(map: Record<string, CartPriceEntry>) {
     let next = { ...it };
     const ext = map[next.slug];
     if (ext && ext.u > 0) {
-      if (!(typeof next.unitPriceRub === "number" && next.unitPriceRub > 0)) {
+      const prevU = typeof next.unitPriceRub === "number" && Number.isFinite(next.unitPriceRub) ? next.unitPriceRub : NaN;
+      if (!Number.isFinite(prevU) || Math.abs(prevU - ext.u) > 1e-5) {
         next.unitPriceRub = ext.u;
         changed = true;
       }
-      if (!next.priceDisplay?.trim() && ext.d) {
+      if (ext.d?.trim() && next.priceDisplay !== ext.d) {
         next.priceDisplay = ext.d;
         changed = true;
       }

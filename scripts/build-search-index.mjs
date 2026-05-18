@@ -89,9 +89,7 @@ function catalogPriceLabelForCart(p) {
 
 function isPricePerMeterHint(hint) {
   const h = String(hint).toLowerCase().replace(/\u00a0/g, " ");
-  return (
-    /\bруб\.?\s*\/\s*м\b/.test(h) || /\b₽\s*\/\s*м\b/.test(h) || /\brub\.?\s*\/\s*m\b/i.test(h)
-  );
+  return /руб\.?\s*\/\s*м/i.test(h) || /₽\s*\/\s*м/.test(h) || /rub\.?\s*\/\s*m/i.test(h);
 }
 
 function metersPerSaleUnit(p) {
