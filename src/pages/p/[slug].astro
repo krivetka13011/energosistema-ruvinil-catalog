@@ -2,7 +2,7 @@
 import Layout from "../../layouts/Layout.astro";
 import AddToCartButton from "../../components/AddToCartButton.astro";
 import { catalog, normalizePath, productPrimaryImage } from "../../utils/catalog";
-import { catalogPriceLabelForCart, catalogUnitPriceRub } from "../../utils/price";
+import { catalogCartPriceLabelForCart, catalogCartUnitPriceRub } from "../../utils/price";
 import type { CatalogCategory } from "../../types/catalog";
 import { baseUrl } from "../../utils/baseUrl";
 
@@ -36,8 +36,8 @@ function breadcrumbForProduct(categoryPath: string): CatalogCategory[] {
 const chain = breadcrumbForProduct(product.categoryPath);
 const sku = product.properties["Артикул"] ?? "";
 const primaryImg = productPrimaryImage(product);
-const unitRub = catalogUnitPriceRub(product);
-const priceLabel = catalogPriceLabelForCart(product);
+const unitRub = catalogCartUnitPriceRub(product);
+const priceLabel = catalogCartPriceLabelForCart(product);
 const galleryImages = product.images.length ? product.images : primaryImg ? [primaryImg] : [];
 ---
 

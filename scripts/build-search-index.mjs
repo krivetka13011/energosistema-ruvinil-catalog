@@ -87,13 +87,66 @@ function catalogPriceLabelForCart(p) {
   return "";
 }
 
+function isPricePerMeterHint(hint) {
+  const h = String(hint).toLowerCase().replace(/\u00a0/g, " ");
+  return (
+    /\bруб\.?\s*\/\s*м\b/.test(h) || /\b₽\s*\/\s*м\b/.test(h) || /\brub\.?\s*\/\s*m\b/i.test(h)
+  );
+}
+
+function metersPerSaleUnit(p) {
+  const props = p.properties || {};
+  const keys = ["Длина в бухте, м", "Длина в бухте", "Длина бухты, м", "Длина, м", "Длина (м)"];
+  for (const k of keys) {
+    const raw = props[k]?.trim?.();
+    if (!raw) continue;
+    const cleaned = String(raw).replace(/\s*м\.?\s*$/i, "").trim();
+    const n = parseFirstPositiveRub(cleaned);
+    if (n != null && n > 0) return n;
+  }
+  const title = p.title || "";
+  const m = title.match(/\((\d+(?:[.,]\d+)?)\s*м\)/i);
+  if (m) {
+    const n = Number.parseFloat(m[1].replace(",", "."));
+    if (Number.isFinite(n) && n > 0) return n;
+  }
+  return null;
+}
+
+function catalogCartUnitPriceRub(p) {
+  const rate = catalogUnitPriceRub(p);
+  if (rate == null) return null;
+  const hint = (p.priceHint && String(p.priceHint).trim()) || "";
+  if (!hint || !isPricePerMeterHint(hint)) return Math.round(rate * 100) / 100;
+  const meters = metersPerSaleUnit(p);
+  if (meters == null) return null;
+  return Math.round(rate * meters * 100) / 100;
+}
+
+function catalogCartPriceLabelForCart(p) {
+  const rate = catalogUnitPriceRub(p);
+  if (rate == null) return catalogPriceLabelForCart(p);
+  const hint = (p.priceHint && String(p.priceHint).trim()) || "";
+  const wholesale = (p.properties && String(p.properties["Опт. прайс, руб."] ?? "").trim()) || "";
+  if (hint && isPricePerMeterHint(hint)) {
+    const meters = metersPerSaleUnit(p);
+    const head = wholesale ? `Опт: ${formatRub(rate)}/м` : hint;
+    if (meters == null) {
+      return `${head} — длина бухты не найдена в данных, сумму за упаковку считайте вручную`;
+    }
+    const total = Math.round(rate * meters * 100) / 100;
+    return `${head} × ${String(meters).replace(".", ",")} м = ${formatRub(total)} за упаковку`;
+  }
+  return catalogPriceLabelForCart(p);
+}
+
 const pricesPath = path.resolve("public/cart-prices.json");
 /** @type {Record<string, { u: number; d: string }>} */
 const prices = {};
 for (const p of catalog.products) {
-  const u = catalogUnitPriceRub(p);
+  const u = catalogCartUnitPriceRub(p);
   if (u == null) continue;
-  prices[p.slug] = { u, d: catalogPriceLabelForCart(p) };
+  prices[p.slug] = { u, d: catalogCartPriceLabelForCart(p) };
 }
 
 fs.mkdirSync(path.dirname(pricesPath), { recursive: true });

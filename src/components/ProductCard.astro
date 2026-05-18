@@ -2,7 +2,7 @@
 import type { CatalogProduct } from "../types/catalog";
 import { baseUrl } from "../utils/baseUrl";
 import { productPrimaryImage } from "../utils/catalog";
-import { catalogPriceLabelForCart, catalogUnitPriceRub } from "../utils/price";
+import { catalogCartPriceLabelForCart, catalogCartUnitPriceRub } from "../utils/price";
 import AddToCartButton from "./AddToCartButton.astro";
 
 interface Props {
@@ -12,8 +12,8 @@ interface Props {
 const { product } = Astro.props;
 const sku = product.properties["Артикул"] ?? "";
 const img = productPrimaryImage(product);
-const unitRub = catalogUnitPriceRub(product);
-const priceLabel = catalogPriceLabelForCart(product);
+const unitRub = catalogCartUnitPriceRub(product);
+const priceLabel = catalogCartPriceLabelForCart(product);
 ---
 
 <div
