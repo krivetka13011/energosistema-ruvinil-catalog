@@ -78,12 +78,18 @@ function linePriceSection(it: CartLine): string {
 }
 
 function cartSummaryHtml(items: CartLine[]): string {
-  const priced = items.filter(hasNumericPrice);
-  const subtotal = priced.reduce((s, it) => s + (it.unitPriceRub as number) * it.qty, 0);
-  if (priced.length === 0) {
+  let pricedLength = 0;
+  const subtotal = items.reduce((s, it) => {
+    if (hasNumericPrice(it)) {
+      pricedLength++;
+      return s + (it.unitPriceRub as number) * it.qty;
+    }
+    return s;
+  }, 0);
+  if (pricedLength === 0) {
     return `<div class="mt-8 rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm text-slate-700"><p class="font-medium text-brand-950">Итого не считается</p><p class="mt-1 text-xs text-slate-600">Для позиций в корзине не удалось определить цену из данных сайта.</p></div>`;
   }
-  if (priced.length === items.length) {
+  if (pricedLength === items.length) {
     return `<div class="mt-8 rounded-2xl border border-brand-200 bg-brand-50/90 px-6 py-4"><p class="text-lg font-semibold text-brand-950">Итого: ${esc(formatRub(subtotal))}</p><p class="mt-2 text-xs text-slate-600">Ориентировочная сумма по ценам из каталога. Финальную сумму и наличие подтвердит менеджер.</p></div>`;
   }
   return `<div class="mt-8 rounded-2xl border border-amber-200 bg-amber-50/80 px-6 py-4"><p class="text-lg font-semibold text-brand-950">Итого по позициям с ценой: ${esc(formatRub(subtotal))}</p><p class="mt-2 text-xs text-slate-700">Часть позиций без числовой цены в данных — полная сумма заказа ниже не показана.</p></div>`;
@@ -187,8 +193,14 @@ function onListChange(e: Event) {
 
 function buildOrderBody(name: string, phone: string, email: string): string {
   const lines = readCart();
-  const priced = lines.filter(hasNumericPrice);
-  const subtotal = priced.reduce((s, it) => s + (it.unitPriceRub as number) * it.qty, 0);
+  let pricedLength = 0;
+  const subtotal = lines.reduce((s, it) => {
+    if (hasNumericPrice(it)) {
+      pricedLength++;
+      return s + (it.unitPriceRub as number) * it.qty;
+    }
+    return s;
+  }, 0);
 
   const rows = lines.map((x, i) => {
     let pricePart = "";
@@ -201,9 +213,9 @@ function buildOrderBody(name: string, phone: string, email: string): string {
   });
 
   const tail = [`Всего наименований: ${lines.length}, всего единиц: ${cartTotalQty()}`];
-  if (priced.length === lines.length && priced.length > 0) {
+  if (pricedLength === lines.length && pricedLength > 0) {
     tail.push(`Итого по каталогу: ${formatRub(subtotal)}`);
-  } else if (priced.length > 0) {
+  } else if (pricedLength > 0) {
     tail.push(`Итого по позициям с ценой: ${formatRub(subtotal)}`);
   }
 
