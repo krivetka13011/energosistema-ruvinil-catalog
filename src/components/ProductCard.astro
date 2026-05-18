@@ -4,6 +4,7 @@ import { baseUrl } from "../utils/baseUrl";
 import { productPrimaryImage } from "../utils/catalog";
 import { catalogCartPriceLabelForCart, catalogCartUnitPriceRub } from "../utils/price";
 import AddToCartButton from "./AddToCartButton.astro";
+import CompareButton from "./CompareButton.astro";
 
 interface Props {
   product: CatalogProduct;
@@ -20,13 +21,13 @@ const priceLabel = catalogCartPriceLabelForCart(product);
   class="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:border-brand-600/25 hover:shadow-soft reveal"
 >
   <a href={baseUrl(`/p/${product.slug}/`)} class="flex flex-1 flex-col outline-none ring-brand-600/50 focus-visible:ring-2">
-    <div class="relative aspect-[4/3] overflow-hidden bg-white">
+    <div class="relative aspect-[4/3] overflow-hidden bg-white flex items-center justify-center">
       {
         img ? (
           <img
             src={img}
             alt={product.title}
-            class="supplier-category-photo h-full w-full min-h-0 min-w-0"
+            class="supplier-category-photo h-full w-full min-h-0 min-w-0 object-contain mix-blend-multiply"
             loading="lazy"
             decoding="async"
             referrerpolicy="no-referrer"
@@ -62,14 +63,17 @@ const priceLabel = catalogCartPriceLabelForCart(product);
       {product.availability ? <p class="text-xs text-emerald-700">{product.availability}</p> : null}
     </div>
   </a>
-  <div class="border-t border-slate-100 bg-white px-4 py-3">
-    <AddToCartButton
+  <div class="border-t border-slate-100 bg-white px-4 py-3 flex gap-2">
+    <div class="flex-1">
+      <AddToCartButton
       slug={product.slug}
       title={product.title}
       sku={sku}
       image={img}
       unitPriceRub={unitRub}
       priceDisplay={priceLabel}
-    />
+      />
+    </div>
+    <CompareButton slug={product.slug} />
   </div>
 </div>

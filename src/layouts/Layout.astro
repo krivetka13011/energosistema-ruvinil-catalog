@@ -51,6 +51,10 @@ const { company } = catalog;
         >
           <a href={baseUrl("/catalog/")} class="transition hover:text-red-200">Каталог</a>
           <a href={baseUrl("/search/")} class="transition hover:text-red-200">Поиск</a>
+          <a href={baseUrl("/compare/")} class="inline-flex items-center gap-1.5 transition hover:text-red-200">
+            <span>Сравнение</span>
+            <span id="compare-badge" class="hidden min-w-[1.35rem] rounded-full bg-white/25 px-1.5 py-0.5 text-center text-[10px] font-bold leading-none text-white sm:text-xs">0</span>
+          </a>
           <a href={baseUrl("/cart/")} class="inline-flex items-center gap-1.5 transition hover:text-red-200">
             <span>Корзина</span>
             <span
@@ -113,6 +117,7 @@ const { company } = catalog;
 
     <script>
       import "../scripts/cart-ui.ts";
+      import "../scripts/compare-ui.ts";
     </script>
     <script>
       function bindReveal() {

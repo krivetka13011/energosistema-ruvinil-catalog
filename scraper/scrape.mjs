@@ -131,7 +131,7 @@ function extractPaginationUrls(html, pageUrl) {
   }
   if (!curPathNorm) return [];
 
-  $('a[href*="PAGEN_"]').each((_, el) => {
+  $('a[href*="PAGEN_"], a:contains("След"), a.bx-pag-next, a[rel="next"]').each((_, el) => {
     const href = $(el).attr("href");
     if (!href) return;
     try {
@@ -352,7 +352,8 @@ async function enrichProductDetails(product) {
 
   const images = [];
   $(".product-detail .product-images img, .product-images img").each((_, el) => {
-    const src = $(el).attr("src") || $(el).attr("data-src") || "";
+    const $a = $(el).closest("a");
+    const src = $a.attr("href") || $(el).attr("src") || $(el).attr("data-src") || "";
     if (!src) return;
     try {
       images.push(new URL(src, BASE).href);

@@ -1,6 +1,7 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import AddToCartButton from "../../components/AddToCartButton.astro";
+import CompareButton from "../../components/CompareButton.astro";
 import { catalog, normalizePath, productPrimaryImage } from "../../utils/catalog";
 import { catalogCartPriceLabelForCart, catalogCartUnitPriceRub } from "../../utils/price";
 import type { CatalogCategory } from "../../types/catalog";
@@ -75,7 +76,7 @@ const galleryImages = product.images.length ? product.images : primaryImg ? [pri
                   <img
                     src={src}
                     alt=""
-                    class="max-h-72 w-full rounded-2xl bg-slate-50 object-contain p-4"
+                    class="max-h-72 w-full rounded-2xl bg-slate-50 object-contain mix-blend-multiply"
                     loading="lazy"
                     referrerpolicy="no-referrer"
                   />
@@ -101,15 +102,18 @@ const galleryImages = product.images.length ? product.images : primaryImg ? [pri
           {product.priceHint ? <p class="mt-4 text-2xl font-semibold text-brand-900">{product.priceHint}</p> : (
             <p class="mt-4 text-lg text-slate-600">Оптовые цены уточняйте у менеджера.</p>
           )}
-          <div class="mt-6 max-w-md">
-            <AddToCartButton
+          <div class="mt-6 max-w-md flex gap-3">
+            <div class="flex-1">
+              <AddToCartButton
               slug={product.slug}
               title={product.title}
               sku={sku}
               image={primaryImg}
               unitPriceRub={unitRub}
               priceDisplay={priceLabel}
-            />
+              />
+            </div>
+            <CompareButton slug={product.slug} />
           </div>
         </div>
 
