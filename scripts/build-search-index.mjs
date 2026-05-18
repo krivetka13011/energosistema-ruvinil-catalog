@@ -93,7 +93,7 @@ function isPricePerMeterHint(hint) {
 }
 
 function metersPerSaleUnit(p) {
-  const props = p.properties || {};
+  const props = p.properties ?? {};
   const keys = ["Длина в бухте, м", "Длина в бухте", "Длина бухты, м", "Длина, м", "Длина (м)"];
   for (const k of keys) {
     const raw = props[k]?.trim?.();
