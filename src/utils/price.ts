@@ -33,7 +33,7 @@ export function isPricePerMeterHint(hint: string): boolean {
  * Берём из характеристик или из названия вида «… (15 м)».
  */
 export function metersPerSaleUnit(product: CatalogProduct): number | null {
-  const props = product.properties || {};
+  const props = product.properties ?? {};
   const keys = [
     "Длина в бухте, м",
     "Длина в бухте",
