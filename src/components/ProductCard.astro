@@ -2,6 +2,7 @@
 import type { CatalogProduct } from "../types/catalog";
 import { baseUrl } from "../utils/baseUrl";
 import { productPrimaryImage } from "../utils/catalog";
+import { catalogPriceLabelForCart, catalogUnitPriceRub } from "../utils/price";
 import AddToCartButton from "./AddToCartButton.astro";
 
 interface Props {
@@ -11,6 +12,8 @@ interface Props {
 const { product } = Astro.props;
 const sku = product.properties["Артикул"] ?? "";
 const img = productPrimaryImage(product);
+const unitRub = catalogUnitPriceRub(product);
+const priceLabel = catalogPriceLabelForCart(product);
 ---
 
 <div
@@ -60,6 +63,13 @@ const img = productPrimaryImage(product);
     </div>
   </a>
   <div class="border-t border-slate-100 bg-white px-4 py-3">
-    <AddToCartButton slug={product.slug} title={product.title} sku={sku} image={img} />
+    <AddToCartButton
+      slug={product.slug}
+      title={product.title}
+      sku={sku}
+      image={img}
+      unitPriceRub={unitRub}
+      priceDisplay={priceLabel}
+    />
   </div>
 </div>

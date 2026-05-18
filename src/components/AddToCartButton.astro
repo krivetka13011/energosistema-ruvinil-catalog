@@ -4,24 +4,83 @@ interface Props {
   title: string;
   sku: string;
   image?: string;
+  /** Числовая цена за единицу из каталога (руб.) */
+  unitPriceRub?: number | null;
+  /** Подпись цены с сайта */
+  priceDisplay?: string;
   class?: string;
 }
 
-const { slug, title, sku, image = "", class: className = "" } = Astro.props;
-const payload = Buffer.from(JSON.stringify({ slug, title, sku, image })).toString("base64");
+const {
+  slug,
+  title,
+  sku,
+  image = "",
+  unitPriceRub = null,
+  priceDisplay = "",
+  class: className = "",
+} = Astro.props;
+
+const payload = Buffer.from(
+  JSON.stringify({
+    slug,
+    title,
+    sku,
+    image,
+    unitPriceRub,
+    priceDisplay,
+  }),
+  "utf8",
+).toString("base64");
 ---
 
-<button
-  type="button"
-  data-cart-add
+<div
+  data-cart-widget
+  data-cart-slug={slug}
   data-item={payload}
-  class:list={[
-    "flex w-full items-center justify-center rounded-xl px-4 py-3 text-center text-sm font-semibold shadow-md transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 sm:text-base",
-    "bg-brand-600 text-white hover:bg-brand-700",
-    "aria-[pressed=true]:bg-emerald-700 aria-[pressed=true]:hover:bg-emerald-800",
-    className,
-  ]}
-  aria-pressed="false"
+  class:list={["w-full", className]}
 >
-  <span data-cart-label>Добавить товар в корзину</span>
-</button>
+  <div data-cart-idle class="w-full">
+    <button
+      type="button"
+      data-cart-add-first
+      class:list={[
+        "flex w-full items-center justify-center rounded-xl px-4 py-3 text-center text-sm font-semibold shadow-md transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 sm:text-base",
+        "bg-brand-600 text-white hover:bg-brand-700",
+      ]}
+    >
+      Добавить в корзину
+    </button>
+  </div>
+  <div
+    data-cart-stepper
+    hidden
+    class="flex w-full items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/80 p-1 shadow-sm sm:gap-3"
+  >
+    <button
+      type="button"
+      data-cart-dec
+      class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-lg font-semibold text-brand-900 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+      aria-label="Уменьшить количество"
+    >
+      −
+    </button>
+    <input
+      type="number"
+      min="1"
+      step="1"
+      inputmode="numeric"
+      data-cart-qty-input
+      class="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-2 py-2 text-center text-base font-semibold text-brand-950 tabular-nums outline-none ring-brand-600/30 focus:border-brand-600 focus:ring-2"
+      aria-label="Количество"
+    />
+    <button
+      type="button"
+      data-cart-inc
+      class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-lg font-semibold text-brand-900 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+      aria-label="Увеличить количество"
+    >
+      +
+    </button>
+  </div>
+</div>

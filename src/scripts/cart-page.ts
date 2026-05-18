@@ -1,4 +1,6 @@
+import type { CartLine } from "./cart-storage";
 import { cartTotalQty, clearCart, readCart, removeLine, setQty } from "./cart-storage";
+import { formatRub } from "../utils/price";
 
 const listRootId = "cart-list-root";
 
@@ -14,6 +16,37 @@ function orderEmailFromDom(): string {
   return document.querySelector("[data-order-email]")?.getAttribute("data-order-email")?.trim() ?? "";
 }
 
+function hasNumericPrice(it: { unitPriceRub?: number | null }): boolean {
+  const p = it.unitPriceRub;
+  return typeof p === "number" && p > 0 && Number.isFinite(p);
+}
+
+function linePriceSection(it: CartLine): string {
+  const hasNum = hasNumericPrice(it);
+  let html = "";
+  if (it.priceDisplay?.trim()) {
+    html += `<p class="mt-1 text-sm text-slate-700">${esc(it.priceDisplay.trim())}</p>`;
+  }
+  if (hasNum) {
+    html += `<p class="mt-1 text-base font-semibold text-brand-900">${esc(formatRub(it.unitPriceRub! * it.qty))}</p>`;
+  } else if (!it.priceDisplay?.trim()) {
+    html += `<p class="mt-1 text-xs text-slate-500">Числовую цену не удалось взять из каталога — строка не участвует в сумме.</p>`;
+  }
+  return html;
+}
+
+function cartSummaryHtml(items: CartLine[]): string {
+  const priced = items.filter(hasNumericPrice);
+  const subtotal = priced.reduce((s, it) => s + (it.unitPriceRub as number) * it.qty, 0);
+  if (priced.length === 0) {
+    return `<div class="mt-8 rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm text-slate-700"><p class="font-medium text-brand-950">Итого не считается</p><p class="mt-1 text-xs text-slate-600">Для позиций в корзине не удалось определить цену из данных сайта.</p></div>`;
+  }
+  if (priced.length === items.length) {
+    return `<div class="mt-8 rounded-2xl border border-brand-200 bg-brand-50/90 px-6 py-4"><p class="text-lg font-semibold text-brand-950">Итого: ${esc(formatRub(subtotal))}</p><p class="mt-2 text-xs text-slate-600">Ориентировочная сумма по ценам из каталога. Финальную сумму и наличие подтвердит менеджер.</p></div>`;
+  }
+  return `<div class="mt-8 rounded-2xl border border-amber-200 bg-amber-50/80 px-6 py-4"><p class="text-lg font-semibold text-brand-950">Итого по позициям с ценой: ${esc(formatRub(subtotal))}</p><p class="mt-2 text-xs text-slate-700">Часть позиций без числовой цены в данных — полная сумма заказа ниже не показана.</p></div>`;
+}
+
 function renderList() {
   const root = document.getElementById(listRootId);
   if (!root) return;
@@ -21,7 +54,7 @@ function renderList() {
   const checkout = document.getElementById("cart-checkout-panel");
   if (!items.length) {
     root.innerHTML =
-      '<p class="text-slate-600">Корзина пуста. Выберите товары в каталоге и нажмите «Добавить товар в корзину».</p>';
+      '<p class="text-slate-600">Корзина пуста. Выберите товары в каталоге и нажмите «Добавить в корзину».</p>';
     if (checkout) checkout.classList.add("hidden");
     return;
   }
@@ -43,14 +76,14 @@ function renderList() {
         <div class="min-w-0 flex-1">
           ${it.sku ? `<p class="text-xs font-semibold uppercase tracking-wide text-accent">Артикул ${esc(it.sku)}</p>` : ""}
           <a href="${esc(hrefProduct(it.slug))}" class="mt-1 line-clamp-2 font-display text-lg font-semibold text-brand-900 hover:text-brand-700">${esc(it.title)}</a>
-          <p class="mt-2 text-xs text-slate-500">Сумму и наличие сообщит менеджер после заявки.</p>
+          ${linePriceSection(it)}
         </div>
       </div>
       <div class="flex shrink-0 flex-wrap items-center gap-3 sm:flex-col sm:items-end">
         <label class="flex items-center gap-2 text-sm text-slate-700">
           <span class="sr-only">Количество</span>
           <button type="button" data-qty-dec="${esc(it.slug)}" class="h-9 w-9 rounded-lg border border-slate-200 font-semibold hover:bg-slate-50" aria-label="Меньше">−</button>
-          <input type="number" min="1" value="${it.qty}" data-qty-input="${esc(it.slug)}" class="w-14 rounded-lg border border-slate-200 px-2 py-1 text-center text-sm font-semibold" />
+          <input type="number" min="1" value="${it.qty}" data-qty-input="${esc(it.slug)}" class="min-w-[3.25rem] rounded-lg border border-slate-200 px-2 py-1 text-center text-sm font-semibold tabular-nums" />
           <button type="button" data-qty-inc="${esc(it.slug)}" class="h-9 w-9 rounded-lg border border-slate-200 font-semibold hover:bg-slate-50" aria-label="Больше">+</button>
         </label>
         <button type="button" data-remove-slug="${esc(it.slug)}" class="text-sm font-semibold text-red-700 hover:underline">
@@ -59,7 +92,7 @@ function renderList() {
       </div>
     </li>`;
     })
-    .join("")}</ul>`;
+    .join("")}</ul>${cartSummaryHtml(items)}`;
 }
 
 function onListClick(e: MouseEvent) {
@@ -112,7 +145,26 @@ function onListChange(e: Event) {
 
 function buildOrderBody(name: string, phone: string, email: string): string {
   const lines = readCart();
-  const rows = lines.map((x, i) => `${i + 1}. ${x.title}${x.sku ? ` — арт. ${x.sku}` : ""} — ${x.qty} шт.`);
+  const priced = lines.filter(hasNumericPrice);
+  const subtotal = priced.reduce((s, it) => s + (it.unitPriceRub as number) * it.qty, 0);
+
+  const rows = lines.map((x, i) => {
+    let pricePart = "";
+    if (hasNumericPrice(x)) {
+      pricePart = ` — ${formatRub(x.unitPriceRub!)} × ${x.qty} = ${formatRub(x.unitPriceRub! * x.qty)}`;
+    } else if (x.priceDisplay?.trim()) {
+      pricePart = ` — ${x.priceDisplay.trim()}`;
+    }
+    return `${i + 1}. ${x.title}${x.sku ? ` — арт. ${x.sku}` : ""}${pricePart} — ${x.qty} шт.`;
+  });
+
+  const tail = [`Всего наименований: ${lines.length}, всего единиц: ${cartTotalQty()}`];
+  if (priced.length === lines.length && priced.length > 0) {
+    tail.push(`Итого по каталогу: ${formatRub(subtotal)}`);
+  } else if (priced.length > 0) {
+    tail.push(`Итого по позициям с ценой: ${formatRub(subtotal)}`);
+  }
+
   return [
     `Заказ с сайта`,
     ``,
@@ -123,7 +175,7 @@ function buildOrderBody(name: string, phone: string, email: string): string {
     `Позиции:`,
     ...rows,
     ``,
-    `Всего наименований: ${lines.length}, всего единиц: ${cartTotalQty()}`,
+    ...tail,
   ].join("\n");
 }
 

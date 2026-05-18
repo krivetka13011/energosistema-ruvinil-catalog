@@ -5,6 +5,10 @@ export type CartLine = {
   image: string;
   qty: number;
   addedAt: number;
+  /** Цена за единицу из каталога (руб.), если удалось распознать */
+  unitPriceRub?: number | null;
+  /** Подпись к цене с сайта (например «44.43 руб./м» или «Опт: … ₽») */
+  priceDisplay?: string;
 };
 
 const KEY = "energosistema-cart-v1";
@@ -71,7 +75,13 @@ export function addToCart(line: Omit<CartLine, "qty" | "addedAt">) {
     writeCart(cur);
     return;
   }
-  cur.unshift({ ...line, qty: 1, addedAt: Date.now() });
+  cur.unshift({
+    ...line,
+    qty: 1,
+    addedAt: Date.now(),
+    unitPriceRub: line.unitPriceRub ?? null,
+    priceDisplay: line.priceDisplay ?? "",
+  });
   writeCart(cur);
 }
 
