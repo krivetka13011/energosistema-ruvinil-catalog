@@ -36,9 +36,21 @@ export function childCategories(categories: CatalogCategory[], parentPath: strin
     .sort((a, b) => a.title.localeCompare(b.title, "ru"));
 }
 
+const normalizePathCache = new Map<string, string>();
+
 export function normalizePath(pathname: string) {
-  if (!pathname.endsWith("/")) return `${pathname}/`;
-  return pathname.replace(/\/{2,}/g, "/");
+  const cached = normalizePathCache.get(pathname);
+  if (cached !== undefined) return cached;
+
+  let res: string;
+  if (!pathname.endsWith("/")) {
+    res = `${pathname}/`;
+  } else {
+    res = pathname.replace(/\/{2,}/g, "/");
+  }
+
+  normalizePathCache.set(pathname, res);
+  return res;
 }
 
 export function productsInCategory(products: CatalogProduct[], categoryPath: string) {
