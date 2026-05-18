@@ -22,7 +22,7 @@ const catalog = JSON.parse(fs.readFileSync(catalogPath, "utf8"));
 
 const items = catalog.products.map((p) => {
   const sku = (p.properties && p.properties["Артикул"]) || "";
-  const propsBlob = Object.entries(p.properties || {})
+  const propsBlob = Object.entries(p.properties ?? {})
     .map(([k, v]) => `${k} ${v}`)
     .join(" ");
   const cp = normalizePathname(p.categoryPath);
@@ -93,7 +93,7 @@ function isPricePerMeterHint(hint) {
 }
 
 function metersPerSaleUnit(p) {
-  const props = p.properties || {};
+  const props = p.properties ?? {};
   const keys = ["Длина в бухте, м", "Длина в бухте", "Длина бухты, м", "Длина, м", "Длина (м)"];
   for (const k of keys) {
     const raw = props[k]?.trim?.();
