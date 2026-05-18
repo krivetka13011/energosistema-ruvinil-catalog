@@ -1,0 +1,67 @@
+---
+interface Props {
+  slug: string;
+}
+const { slug } = Astro.props;
+---
+
+<button
+  type="button"
+  data-compare-btn
+  data-slug={slug}
+  class="flex h-12 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-brand-900 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 aria-pressed:bg-brand-50 aria-pressed:text-brand-700"
+>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    class="mr-2 h-4 w-4"
+    aria-hidden="true"
+  >
+    <path d="M16 3h5v5M4 21v-7a4 4 0 0 1 4-4h11M21 3l-7 7M8 21H3v-5M20 3v7a4 4 0 0 1-4 4H5M3 21l7-7" />
+  </svg>
+  <span data-compare-text>Сравнить</span>
+</button>
+
+<script>
+  import { getCompareItems, addToCompare, removeFromCompare } from "../scripts/compare-storage";
+
+  function updateBtn(btn: HTMLButtonElement) {
+    const slug = btn.dataset.slug;
+    if (!slug) return;
+    const items = getCompareItems();
+    const isComp = items.includes(slug);
+    btn.setAttribute("aria-pressed", isComp.toString());
+    const textEl = btn.querySelector("[data-compare-text]");
+    if (textEl) {
+      textEl.textContent = isComp ? "В сравнении" : "Сравнить";
+    }
+  }
+
+  function bind() {
+    const btns = document.querySelectorAll<HTMLButtonElement>("[data-compare-btn]:not([data-compare-bound])");
+    btns.forEach((btn) => {
+      btn.dataset.compareBound = "1";
+      updateBtn(btn);
+      btn.addEventListener("click", () => {
+        const slug = btn.dataset.slug;
+        if (!slug) return;
+        if (btn.getAttribute("aria-pressed") === "true") {
+          removeFromCompare(slug);
+        } else {
+          addToCompare(slug);
+        }
+      });
+    });
+  }
+
+  bind();
+  document.addEventListener("astro:after-swap", bind);
+  window.addEventListener("compare:updated", () => {
+    document.querySelectorAll<HTMLButtonElement>("[data-compare-btn]").forEach(updateBtn);
+  });
+</script>
