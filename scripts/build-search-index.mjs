@@ -22,7 +22,7 @@ const catalog = JSON.parse(fs.readFileSync(catalogPath, "utf8"));
 
 const items = catalog.products.map((p) => {
   const sku = (p.properties && p.properties["Артикул"]) || "";
-  const propsBlob = Object.entries(p.properties || {})
+  const propsBlob = Object.entries(p.properties ?? {})
     .map(([k, v]) => `${k} ${v}`)
     .join(" ");
   const cp = normalizePathname(p.categoryPath);
