@@ -9,6 +9,7 @@
     "scrape:full": "node scraper/scrape.mjs --details",
     "scrape:quick": "cross-env SCRAPE_MAX_PAGES=12 SCRAPE_DELAY_MS=350 node scraper/scrape.mjs",
     "merge:prices": "node scripts/merge-price-list.mjs",
+    "backfill:articles": "node scripts/backfill-articles.mjs",
     "normalize:catalog-paths": "node scripts/normalize-catalog-category-paths.mjs",
     "prebuild": "node scraper/ensure-catalog.mjs && node scripts/normalize-catalog-category-paths.mjs && node scripts/build-search-index.mjs",
     "dev": "astro dev",

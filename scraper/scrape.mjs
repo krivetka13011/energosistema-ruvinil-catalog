@@ -345,6 +345,11 @@ async function enrichProductDetails(product) {
     if (name && value) detailProps[name] = value;
   });
 
+  const articleFromHeader = $(".article-property-custom .product-main-property-value").first().text().trim();
+  if (articleFromHeader && !detailProps["Артикул"]) {
+    detailProps["Артикул"] = articleFromHeader;
+  }
+
   const images = [];
   $(".product-detail .product-images img, .product-images img").each((_, el) => {
     const src = $(el).attr("src") || $(el).attr("data-src") || "";
@@ -357,8 +362,8 @@ async function enrichProductDetails(product) {
     }
   });
   const uniq = [...new Set(images)];
-  const properties =
-    Object.keys(detailProps).length > 0 ? detailProps : product.properties || {};
+  /** Не затираем данные с листинга (артикул и др.) — только дополняем с карточки товара. */
+  const properties = { ...(product.properties || {}), ...detailProps };
 
   return {
     descriptionHtml: desc,
