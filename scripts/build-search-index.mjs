@@ -8,8 +8,32 @@ function norm(s) {
   return String(s)
     .toLowerCase()
     .replace(/ё/g, "е")
+    .replace(/\u00a0/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+/** Синхронизировать с src/scripts/search-core.ts */
+function normSearchText(s) {
+  let x = norm(s);
+  x = x.replace(/(\d)\s*метр(ов|а|ы)?/gi, "$1 м");
+  x = x.replace(/(\d)(мм|м|шт)(?=\s|$|[.,])/gi, "$1 $2");
+  x = x.replace(/(\d)мм\b/gi, "$1 мм");
+  x = x.replace(/(\d)м\b/g, "$1 м");
+  x = x.replace(/гофрирован\w*/g, "гофра");
+  x = x.replace(/(\d)\s*х\s*(\d)/g, "$1x$2");
+  return x.replace(/\s+/g, " ").trim();
+}
+
+function primaryImage(p) {
+  if (p.image) return String(p.image);
+  if (Array.isArray(p.images) && p.images[0]) return String(p.images[0]);
+  return "";
+}
+
+function encodeCartPayload(item) {
+  const json = JSON.stringify(item);
+  return Buffer.from(json, "utf8").toString("base64");
 }
 
 function normalizePathname(p) {
@@ -26,32 +50,6 @@ if (catalog.categories) {
     categoryMap.set(normalizePathname(c.pathname), c);
   }
 }
-
-const items = catalog.products.map((p) => {
-  const sku = (p.properties && p.properties["Артикул"]) || "";
-  const propsBlob = Object.entries(p.properties ?? {})
-    .map(([k, v]) => `${k} ${v}`)
-    .join(" ");
-  const cp = normalizePathname(p.categoryPath);
-  const cat = categoryMap.get(cp);
-  const catTitle = cat ? cat.title : "";
-  const haystack = norm(`${p.title} ${sku} ${propsBlob} ${catTitle}`);
-  return {
-    slug: p.slug,
-    title: p.title,
-    sku,
-    category: catTitle,
-    haystack,
-  };
-});
-
-fs.mkdirSync(path.dirname(outPath), { recursive: true });
-fs.writeFileSync(
-  outPath,
-  JSON.stringify({ generatedAt: new Date().toISOString(), count: items.length, items }),
-  "utf8",
-);
-console.error(`[search-index] ${items.length} items → ${outPath}`);
 
 /** Дублирует логику src/utils/price.ts — при изменении правил синхронизировать вручную. */
 function parseFirstPositiveRub(text) {
@@ -253,3 +251,46 @@ fs.writeFileSync(
   "utf8",
 );
 console.error(`[cart-prices] ${Object.keys(prices).length} slugs → ${pricesPath}`);
+
+const items = catalog.products.map((p) => {
+  const sku = (p.properties && p.properties["Артикул"]) || "";
+  const propsBlob = Object.entries(p.properties ?? {})
+    .map(([k, v]) => `${k} ${v}`)
+    .join(" ");
+  const cp = normalizePathname(p.categoryPath);
+  const cat = categoryMap.get(cp);
+  const catTitle = cat ? cat.title : "";
+  const priceHint = (p.priceHint && String(p.priceHint).trim()) || "";
+  const unitPriceRub = catalogCartUnitPriceRub(p);
+  const priceDisplay = catalogCartPriceLabelForCart(p);
+  const image = primaryImage(p);
+  const haystack = normSearchText(`${p.title} ${sku} ${propsBlob} ${catTitle} ${priceHint}`);
+  const cartPayload = encodeCartPayload({
+    slug: p.slug,
+    title: p.title,
+    sku: String(sku),
+    image,
+    unitPriceRub: unitPriceRub != null ? unitPriceRub : null,
+    priceDisplay: priceDisplay || priceHint,
+  });
+  return {
+    slug: p.slug,
+    title: p.title,
+    sku: String(sku),
+    category: catTitle,
+    image,
+    priceHint,
+    haystack,
+    unitPriceRub: unitPriceRub != null ? unitPriceRub : null,
+    priceDisplay: priceDisplay || priceHint,
+    cartPayload,
+  };
+});
+
+fs.mkdirSync(path.dirname(outPath), { recursive: true });
+fs.writeFileSync(
+  outPath,
+  JSON.stringify({ generatedAt: new Date().toISOString(), count: items.length, items }),
+  "utf8",
+);
+console.error(`[search-index] ${items.length} items → ${outPath}`);

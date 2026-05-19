@@ -127,14 +127,18 @@ function renderList() {
           ${linePriceSection(it)}
         </div>
       </div>
-      <div class="flex shrink-0 flex-wrap items-center gap-3 sm:flex-col sm:items-end">
-        <label class="flex items-center gap-2 text-sm text-slate-700">
+      <div class="flex w-full shrink-0 flex-col gap-3 sm:w-44">
+        <label class="flex w-full items-center justify-center gap-2 text-sm text-slate-700">
           <span class="sr-only">Количество</span>
-          <button type="button" data-qty-dec="${esc(it.slug)}" class="h-9 w-9 rounded-lg border border-slate-200 font-semibold hover:bg-slate-50" aria-label="Меньше">−</button>
-          <input type="number" min="1" value="${it.qty}" data-qty-input="${esc(it.slug)}" class="min-w-[3.25rem] rounded-lg border border-slate-200 px-2 py-1 text-center text-sm font-semibold tabular-nums" />
-          <button type="button" data-qty-inc="${esc(it.slug)}" class="h-9 w-9 rounded-lg border border-slate-200 font-semibold hover:bg-slate-50" aria-label="Больше">+</button>
+          <button type="button" data-qty-dec="${esc(it.slug)}" class="h-10 w-10 shrink-0 rounded-lg border border-slate-200 bg-white font-semibold shadow-sm hover:bg-slate-50" aria-label="Меньше">−</button>
+          <input type="number" min="1" value="${it.qty}" data-qty-input="${esc(it.slug)}" class="cart-qty-input min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-2 py-2 text-center text-sm font-semibold tabular-nums" />
+          <button type="button" data-qty-inc="${esc(it.slug)}" class="h-10 w-10 shrink-0 rounded-lg border border-slate-200 bg-white font-semibold shadow-sm hover:bg-slate-50" aria-label="Больше">+</button>
         </label>
-        <button type="button" data-remove-slug="${esc(it.slug)}" class="text-sm font-semibold text-red-700 hover:underline">
+        <button
+          type="button"
+          data-remove-slug="${esc(it.slug)}"
+          class="w-full rounded-xl bg-red-600 px-4 py-2.5 text-center text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
+        >
           Удалить
         </button>
       </div>

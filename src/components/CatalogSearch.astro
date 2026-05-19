@@ -1,0 +1,47 @@
+---
+interface Props {
+  class?: string;
+}
+
+const { class: className = "" } = Astro.props;
+---
+
+<div
+  class:list={["relative", className]}
+  data-catalog-search
+>
+  <label class="block">
+    <span class="sr-only">Поиск по каталогу</span>
+    <div class="relative">
+      <svg
+        class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        aria-hidden="true"
+      >
+        <circle cx="11" cy="11" r="7"></circle>
+        <path d="M20 20l-3.5-3.5"></path>
+      </svg>
+      <input
+        type="search"
+        data-catalog-search-input
+        autocomplete="off"
+        placeholder="Название, артикул, «гофра 100 м», «100м»…"
+        class="w-full rounded-2xl border border-slate-200 bg-white py-3.5 pl-12 pr-4 text-base text-brand-950 shadow-sm outline-none ring-brand-600/25 placeholder:text-slate-400 focus:border-brand-600 focus:ring-2"
+      />
+    </div>
+  </label>
+  <div
+    data-catalog-search-dropdown
+    class="absolute left-0 right-0 z-50 mt-2 hidden overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg ring-1 ring-slate-900/5"
+    role="listbox"
+    aria-live="polite"
+  >
+  </div>
+</div>
+
+<script>
+  import "../scripts/catalog-search-ui.ts";
+</script>

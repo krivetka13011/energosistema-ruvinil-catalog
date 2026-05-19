@@ -1,5 +1,6 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import CatalogSearch from "../../components/CatalogSearch.astro";
 import CategorySectionCard from "../../components/CategorySectionCard.astro";
 import ProductCard from "../../components/ProductCard.astro";
 import type { CatalogCategory } from "../../types/catalog";
@@ -80,6 +81,9 @@ const shown = sortProductsInCategoryTree(inTree);
         В этом разделе: <span class="font-semibold text-brand-900">{direct.length}</span> поз. напрямую ·{" "}
         <span class="font-semibold text-brand-900">{inTree.length}</span> с учётом подразделов.
       </p>
+      <div class="reveal mt-6 max-w-2xl">
+        <CatalogSearch />
+      </div>
     </div>
   </section>
 

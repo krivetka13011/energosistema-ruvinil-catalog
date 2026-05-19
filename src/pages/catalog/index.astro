@@ -1,5 +1,6 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import CatalogSearch from "../../components/CatalogSearch.astro";
 import CategorySectionCard from "../../components/CategorySectionCard.astro";
 import {
   catalog,
@@ -30,13 +31,7 @@ const roots = childCategoriesOrdered(catalog.categories, "/catalog/");
       <p class="reveal mt-4 max-w-2xl text-base text-sky-50/95 md:text-lg">
         Выберите раздел. Ассортимент и цены уточняйте по телефону или e-mail — или оформите заявку через корзину.
       </p>
-      <p class="reveal mt-8 flex flex-wrap gap-3">
-        <a
-          href={baseUrl("/search/")}
-          class="inline-flex rounded-full border border-white/35 bg-white/10 px-5 py-2.5 text-sm font-semibold backdrop-blur-sm transition hover:bg-white/20"
-        >
-          Поиск по каталогу
-        </a>
+      <p class="reveal mt-6">
         <a
           href={baseUrl("/cart/")}
           class="inline-flex rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-brand-900 shadow-sm transition hover:bg-sky-50"
@@ -44,6 +39,12 @@ const roots = childCategoriesOrdered(catalog.categories, "/catalog/");
           Корзина
         </a>
       </p>
+    </div>
+
+    <div class="relative z-20 mx-auto max-w-7xl overflow-visible px-4 pb-8">
+      <div class="reveal overflow-visible rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200/80 md:p-5">
+        <CatalogSearch />
+      </div>
     </div>
 
     <div class="mx-auto max-w-7xl px-4 pb-14 md:pb-20">

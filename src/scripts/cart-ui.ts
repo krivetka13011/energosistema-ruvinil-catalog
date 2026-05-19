@@ -6,6 +6,7 @@ import {
   setQty,
   type CartLine,
 } from "./cart-storage";
+import { flyToCart } from "./cart-fly";
 
 /** UTF-8 JSON из base64 (совместимо с Buffer.from(..., 'utf8').toString('base64') на сборке). */
 function parseJsonFromBase64Utf8(raw: string): unknown {
@@ -104,6 +105,7 @@ function bindCartWidgetClicks() {
       const payload = parsePayload(widget);
       if (!payload) return;
       addToCart(payload);
+      flyToCart(addFirst);
       refreshCartWidgets();
       syncCartBadge();
       return;
