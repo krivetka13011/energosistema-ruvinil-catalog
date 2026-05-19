@@ -53,9 +53,23 @@ export function normalizePath(pathname: string) {
   return res;
 }
 
+/** Раздел листинга, с которого взята карточка (как на ruvinil.ru). */
+export function listingCategoryPath(product: CatalogProduct): string | null {
+  if (!product.listingPage) return null;
+  try {
+    return normalizePath(new URL(product.listingPage).pathname);
+  } catch {
+    return null;
+  }
+}
+
 export function productsInCategory(products: CatalogProduct[], categoryPath: string) {
   const cp = normalizePath(categoryPath);
-  return products.filter((p) => normalizePath(p.categoryPath) === cp);
+  return products.filter((p) => {
+    const assigned = normalizePath(p.categoryPath);
+    const listed = listingCategoryPath(p);
+    return assigned === cp || listed === cp;
+  });
 }
 
 /** Pathname всех узлов поддерева (корень включительно) по parentPath — как в меню поставщика. */
@@ -87,7 +101,11 @@ export function productsInCategoryTree(
   rootPathname: string,
 ): CatalogProduct[] {
   const paths = descendantCategoryPathSet(categories, rootPathname);
-  return products.filter((p) => paths.has(normalizePath(p.categoryPath)));
+  return products.filter((p) => {
+    const assigned = normalizePath(p.categoryPath);
+    const listed = listingCategoryPath(p);
+    return paths.has(assigned) || (listed !== null && paths.has(listed));
+  });
 }
 
 /** Порядок позиций как в листинге на ruvinil.ru (страница пагинации → порядок на странице). */

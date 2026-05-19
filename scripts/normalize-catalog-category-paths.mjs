@@ -1,25 +1,16 @@
 import fs from "fs/promises";
 import path from "path";
 
+import {
+  inferCategoryPathFromProductUrl,
+  normalizeCatalogPath,
+} from "../scraper/category-path.mjs";
+
 const target = path.resolve("src/data/catalog.json");
 
 function normalizePath(pathname) {
   const withSlash = pathname.endsWith("/") ? pathname : `${pathname}/`;
   return withSlash.replace(/\/{2,}/g, "/");
-}
-
-function inferCategoryPath(productUrl) {
-  try {
-    const pathname = new URL(productUrl).pathname.replace(/\/{2,}/g, "/");
-    const trimmed = pathname.replace(/\/+$/, "");
-    const slash = trimmed.lastIndexOf("/");
-    if (slash <= 0) return null;
-    const folder = `${trimmed.slice(0, slash)}/`;
-    if (!folder.startsWith("/catalog") || folder === "/catalog/") return null;
-    return normalizePath(folder);
-  } catch {
-    return null;
-  }
 }
 
 async function main() {
@@ -28,11 +19,23 @@ async function main() {
   let changed = 0;
   for (const p of catalog.products ?? []) {
     if (!p.url) continue;
-    const inferred = inferCategoryPath(p.url);
-    if (!inferred) continue;
+    /** @type {string | null} */
+    let next = null;
+    if (p.listingPage) {
+      try {
+        next = normalizeCatalogPath(new URL(p.listingPage).pathname);
+      } catch {
+        next = null;
+      }
+    }
+    if (!next) {
+      const fallback = normalizeCatalogPath(p.categoryPath ?? "") ?? "/catalog/";
+      next = inferCategoryPathFromProductUrl(p.url, fallback);
+    }
     const prev = normalizePath(p.categoryPath ?? "");
-    if (prev !== inferred) {
-      p.categoryPath = inferred;
+    const nextNorm = normalizePath(next);
+    if (prev !== nextNorm) {
+      p.categoryPath = nextNorm;
       changed += 1;
     }
   }

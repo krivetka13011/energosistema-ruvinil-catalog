@@ -52,35 +52,35 @@ const payload = Buffer.from(
       Добавить в корзину
     </button>
   </div>
-  <div
-    data-cart-stepper
-    hidden
-    class="flex w-full items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/80 p-1 shadow-sm sm:gap-3"
-  >
-    <button
-      type="button"
-      data-cart-dec
-      class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-lg font-semibold text-brand-900 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
-      aria-label="Уменьшить количество"
+  <div data-cart-stepper class="hidden w-full">
+    <div
+      class="flex w-full items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/80 p-1 shadow-sm sm:gap-3"
     >
-      −
-    </button>
-    <input
-      type="number"
-      min="1"
-      step="1"
-      inputmode="numeric"
-      data-cart-qty-input
-      class="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-2 py-2 text-center text-base font-semibold text-brand-950 tabular-nums outline-none ring-brand-600/30 focus:border-brand-600 focus:ring-2"
-      aria-label="Количество"
-    />
-    <button
-      type="button"
-      data-cart-inc
-      class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-lg font-semibold text-brand-900 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
-      aria-label="Увеличить количество"
-    >
-      +
-    </button>
+      <button
+        type="button"
+        data-cart-dec
+        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-lg font-semibold text-brand-900 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+        aria-label="Уменьшить количество"
+      >
+        −
+      </button>
+      <input
+        type="number"
+        min="1"
+        step="1"
+        inputmode="numeric"
+        data-cart-qty-input
+        class="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-2 py-2 text-center text-base font-semibold text-brand-950 tabular-nums outline-none ring-brand-600/30 focus:border-brand-600 focus:ring-2"
+        aria-label="Количество"
+      />
+      <button
+        type="button"
+        data-cart-inc
+        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-lg font-semibold text-brand-900 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+        aria-label="Увеличить количество"
+      >
+        +
+      </button>
+    </div>
   </div>
 </div>

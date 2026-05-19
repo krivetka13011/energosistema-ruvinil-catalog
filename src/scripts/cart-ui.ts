@@ -53,11 +53,11 @@ function syncCartWidget(el: HTMLElement) {
   const stepper = el.querySelector<HTMLElement>("[data-cart-stepper]");
   const input = el.querySelector<HTMLInputElement>("[data-cart-qty-input]");
   if (qty < 1) {
-    idle?.removeAttribute("hidden");
-    stepper?.setAttribute("hidden", "");
+    idle?.classList.remove("hidden");
+    stepper?.classList.add("hidden");
   } else {
-    idle?.setAttribute("hidden", "");
-    stepper?.removeAttribute("hidden");
+    idle?.classList.add("hidden");
+    stepper?.classList.remove("hidden");
     if (input) input.value = String(qty);
   }
 }

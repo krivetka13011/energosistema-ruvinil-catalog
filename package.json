@@ -13,6 +13,8 @@
     "catalog:quality": "node scripts/catalog-quality-report.mjs",
     "fix:empty-categories": "node scripts/fix-empty-category-paths-from-supplier.mjs",
     "reassign:listing-categories": "node scripts/reassign-listing-categories.mjs",
+    "catalog:sync-paths": "node scripts/sync-category-paths-from-supplier.mjs",
+    "catalog:refresh": "node scraper/scrape.mjs --details && node scripts/sync-category-paths-from-supplier.mjs && node scripts/normalize-catalog-category-paths.mjs && node scripts/build-search-index.mjs",
     "backfill:articles": "node scripts/backfill-articles.mjs",
     "backfill:detail": "node scripts/backfill-missing-detail.mjs",
     "normalize:catalog-paths": "node scripts/normalize-catalog-category-paths.mjs",

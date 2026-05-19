@@ -73,13 +73,15 @@ const galleryImages = product.images.length ? product.images : primaryImg ? [pri
             galleryImages.length ? (
               <div class="grid gap-4 sm:grid-cols-2">
                 {galleryImages.map((src) => (
-                  <img
-                    src={src}
-                    alt=""
-                    class="max-h-72 w-full rounded-2xl bg-slate-50 object-contain mix-blend-multiply"
-                    loading="lazy"
-                    referrerpolicy="no-referrer"
-                  />
+                  <div class="aspect-square overflow-hidden rounded-2xl bg-slate-50 ring-1 ring-slate-100">
+                    <img
+                      src={src}
+                      alt=""
+                      class="h-full w-full object-cover object-center"
+                      loading="lazy"
+                      referrerpolicy="no-referrer"
+                    />
+                  </div>
                 ))}
               </div>
             ) : (
