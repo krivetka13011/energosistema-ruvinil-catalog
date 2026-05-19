@@ -225,11 +225,3 @@ export function catalogCartPriceLabelForCart(product: CatalogProduct): string {
 
   return catalogPriceLabelForCart(product);
 }
-
-/** Цена для отображения на карточке (с расчётом упаковки, если возможно). */
-export function catalogCardPriceLabel(product: CatalogProduct): string {
-  const calc = catalogCartPriceLabelForCart(product);
-  if (calc && calc !== catalogPriceLabelForCart(product)) return calc;
-  if (product.priceHint?.trim()) return product.priceHint.trim();
-  return calc;
-}

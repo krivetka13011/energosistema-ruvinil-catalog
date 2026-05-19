@@ -2,11 +2,7 @@
 import type { CatalogProduct } from "../types/catalog";
 import { baseUrl } from "../utils/baseUrl";
 import { productPrimaryImage } from "../utils/catalog";
-import {
-  catalogCardPriceLabel,
-  catalogCartPriceLabelForCart,
-  catalogCartUnitPriceRub,
-} from "../utils/price";
+import { catalogCartPriceLabelForCart, catalogCartUnitPriceRub } from "../utils/price";
 import AddToCartButton from "./AddToCartButton.astro";
 import CompareButton from "./CompareButton.astro";
 
@@ -18,7 +14,6 @@ const { product } = Astro.props;
 const sku = product.properties["Артикул"] ?? "";
 const img = productPrimaryImage(product);
 const unitRub = catalogCartUnitPriceRub(product);
-const cardPriceLabel = catalogCardPriceLabel(product);
 const priceLabel = catalogCartPriceLabelForCart(product);
 ---
 
@@ -52,8 +47,8 @@ const priceLabel = catalogCartPriceLabelForCart(product);
         {product.title}
       </h3>
       {
-        cardPriceLabel ? (
-          <p class="text-sm font-medium text-accent">{cardPriceLabel}</p>
+        product.priceHint ? (
+          <p class="text-sm font-medium text-accent">{product.priceHint}</p>
         ) : (
           <p class="text-sm text-slate-500">Оптовые цены уточняйте</p>
         )

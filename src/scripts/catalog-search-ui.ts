@@ -56,7 +56,7 @@ function renderDropdown(dropdown: HTMLElement, rows: SearchIndexRow[], query: st
       const img = r.image
         ? `<img src="${esc(r.image)}" alt="" class="h-full w-full object-contain p-1 mix-blend-multiply" loading="lazy" referrerpolicy="no-referrer" />`
         : `<span class="text-[10px] text-slate-400">Нет фото</span>`;
-      const price = r.priceDisplay || r.priceHint;
+      const price = r.priceHint;
       return `
       <li class="flex gap-3 p-3 hover:bg-slate-50">
         <a href="${esc(hrefProduct(r.slug))}" class="flex min-w-0 flex-1 gap-3">
