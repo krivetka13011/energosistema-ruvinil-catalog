@@ -104,17 +104,15 @@ const galleryImages = product.images.length ? product.images : primaryImg ? [pri
           {product.priceHint ? <p class="mt-4 text-2xl font-semibold text-brand-900">{product.priceHint}</p> : (
             <p class="mt-4 text-lg text-slate-600">Оптовые цены уточняйте у менеджера.</p>
           )}
-          <div class="mt-6 max-w-md flex gap-3">
-            <div class="flex-1">
-              <AddToCartButton
+          <div class="mt-6 flex max-w-md flex-col gap-2">
+            <AddToCartButton
               slug={product.slug}
               title={product.title}
               sku={sku}
               image={primaryImg}
               unitPriceRub={unitRub}
               priceDisplay={priceLabel}
-              />
-            </div>
+            />
             <CompareButton slug={product.slug} />
           </div>
         </div>

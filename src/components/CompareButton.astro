@@ -1,30 +1,23 @@
 ---
 interface Props {
   slug: string;
+  class?: string;
 }
-const { slug } = Astro.props;
+
+const { slug, class: className = "" } = Astro.props;
 ---
 
 <button
   type="button"
   data-compare-btn
   data-slug={slug}
-  class="flex h-12 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-brand-900 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 aria-pressed:bg-brand-50 aria-pressed:text-brand-700"
+  class:list={[
+    "flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-brand-900 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 sm:text-base",
+    "aria-pressed:border-brand-600 aria-pressed:bg-brand-50 aria-pressed:text-brand-800",
+    className,
+  ]}
 >
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    stroke-width="2"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-    class="mr-2 h-4 w-4"
-    aria-hidden="true"
-  >
-    <path d="M16 3h5v5M4 21v-7a4 4 0 0 1 4-4h11M21 3l-7 7M8 21H3v-5M20 3v7a4 4 0 0 1-4 4H5M3 21l7-7" />
-  </svg>
-  <span data-compare-text>Сравнить</span>
+  <span data-compare-text>Добавить в сравнение</span>
 </button>
 
 <script>
@@ -33,12 +26,11 @@ const { slug } = Astro.props;
   function updateBtn(btn: HTMLButtonElement) {
     const slug = btn.dataset.slug;
     if (!slug) return;
-    const items = getCompareItems();
-    const isComp = items.includes(slug);
+    const isComp = getCompareItems().includes(slug);
     btn.setAttribute("aria-pressed", isComp.toString());
     const textEl = btn.querySelector("[data-compare-text]");
     if (textEl) {
-      textEl.textContent = isComp ? "В сравнении" : "Сравнить";
+      textEl.textContent = isComp ? "В сравнении" : "Добавить в сравнение";
     }
   }
 

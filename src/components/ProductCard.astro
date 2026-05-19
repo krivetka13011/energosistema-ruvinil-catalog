@@ -18,7 +18,7 @@ const priceLabel = catalogCartPriceLabelForCart(product);
 ---
 
 <div
-  class="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:border-brand-600/25 hover:shadow-soft reveal"
+  class="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:border-brand-600/25 hover:shadow-soft reveal"
 >
   <a href={baseUrl(`/p/${product.slug}/`)} class="flex flex-1 flex-col outline-none ring-brand-600/50 focus-visible:ring-2">
     <div class="relative aspect-[4/3] overflow-hidden bg-white flex items-center justify-center">
@@ -63,17 +63,17 @@ const priceLabel = catalogCartPriceLabelForCart(product);
       {product.availability ? <p class="text-xs text-emerald-700">{product.availability}</p> : null}
     </div>
   </a>
-  <div class="border-t border-slate-100 bg-white px-4 py-3 flex gap-2">
-    <div class="flex-1">
+  <div class="mt-auto border-t border-slate-100 bg-white px-4 py-3">
+    <div class="flex flex-col gap-2">
       <AddToCartButton
-      slug={product.slug}
-      title={product.title}
-      sku={sku}
-      image={img}
-      unitPriceRub={unitRub}
-      priceDisplay={priceLabel}
+        slug={product.slug}
+        title={product.title}
+        sku={sku}
+        image={img}
+        unitPriceRub={unitRub}
+        priceDisplay={priceLabel}
       />
+      <CompareButton slug={product.slug} />
     </div>
-    <CompareButton slug={product.slug} />
   </div>
 </div>
