@@ -2,13 +2,15 @@ import * as cheerio from "cheerio";
 import fs from "fs/promises";
 import path from "path";
 
+import { normalizeCatalogPath, pickMoreSpecificCategoryPath } from "./category-path.mjs";
+import { BASE, extractListingProducts, extractPaginationUrls } from "./listing-html.mjs";
+
 /**
  * Зеркало каталога https://www.ruvinil.ru/catalog/ : те же разделы/подразделы (иерархия и названия),
  * те же товары в узлах, порядок как в листинге, полные характеристики и описание — с флагом --details.
  * Оформление сайта (UI) своё, источник данных только страницы поставщика.
  */
 
-const BASE = "https://www.ruvinil.ru";
 const UA =
   "Mozilla/5.0 (compatible; RetailCatalogBot/1.0; +mailto:zakaz@en-msk.ru) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
@@ -24,26 +26,6 @@ const categoryMeta = new Map();
 
 function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
-}
-
-function normalizeCatalogPath(pathname) {
-  if (!pathname.startsWith("/catalog")) return null;
-  const withSlash = pathname.endsWith("/") ? pathname : `${pathname}/`;
-  return withSlash.replace(/\/{2,}/g, "/");
-}
-
-/** Папка категории по URL карточки товара (/catalog/раздел/товар/ → /catalog/раздел/). */
-function inferCategoryPathFromProductUrl(absProductUrl, fallbackListingPath) {
-  try {
-    const pathname = new URL(absProductUrl).pathname.replace(/\/{2,}/g, "/");
-    const trimmed = pathname.replace(/\/+$/, "");
-    const slash = trimmed.lastIndexOf("/");
-    if (slash <= 0) return fallbackListingPath;
-    const folder = `${trimmed.slice(0, slash)}/`;
-    return normalizeCatalogPath(folder) ?? fallbackListingPath;
-  } catch {
-    return fallbackListingPath;
-  }
 }
 
 /** Ключ параметра пагинации Bitrix (часто PAGEN_1) по разметке страницы */
@@ -120,79 +102,6 @@ async function fetchHtml(url) {
   throw lastErr ?? new Error(`fetch failed ${url}`);
 }
 
-function extractPaginationUrls(html, pageUrl) {
-  const $ = cheerio.load(html);
-  const out = new Set();
-  let curPathNorm;
-  try {
-    curPathNorm = normalizeCatalogPath(new URL(pageUrl).pathname);
-  } catch {
-    return [];
-  }
-  if (!curPathNorm) return [];
-
-  $('a[href*="PAGEN_"], a:contains("След"), a.bx-pag-next, a[rel="next"]').each((_, el) => {
-    const href = $(el).attr("href");
-    if (!href) return;
-    try {
-      const abs = new URL(href, pageUrl).href.split("#")[0];
-      if (!abs.includes(`${BASE}/catalog/`)) return;
-      const u = new URL(abs);
-      if (normalizeCatalogPath(u.pathname) !== curPathNorm) return;
-      out.add(abs);
-    } catch {
-      /* ignore */
-    }
-  });
-
-  let maxPage = 1;
-  /** @type {string} */
-  let paramKey = "PAGEN_1";
-  for (const link of out) {
-    const u = new URL(link);
-    for (const [k, v] of u.searchParams.entries()) {
-      if (!/^PAGEN_\d+$/.test(k)) continue;
-      paramKey = k;
-      const n = Number.parseInt(v, 10);
-      if (Number.isFinite(n) && n > maxPage) maxPage = n;
-    }
-  }
-
-  for (const m of html.matchAll(/PAGEN_(\d+)=(\d+)/g)) {
-    const k = `PAGEN_${m[1]}`;
-    const n = Number.parseInt(m[2], 10);
-    if (Number.isFinite(n) && n > maxPage) {
-      maxPage = n;
-      paramKey = k;
-    }
-  }
-
-  const SAFE_MAX_PAGES = 600;
-  if (maxPage > SAFE_MAX_PAGES) {
-    console.error(`Pagination для ${curPathNorm}: обрезано ${maxPage} → ${SAFE_MAX_PAGES} (страховка)`);
-    maxPage = SAFE_MAX_PAGES;
-  }
-
-  if (maxPage > 1) {
-    try {
-      const base = new URL(pageUrl);
-      base.hash = "";
-      base.search = "";
-      let baseHref = base.href;
-      if (!baseHref.endsWith("/")) baseHref = `${baseHref}/`;
-      for (let n = 2; n <= maxPage; n++) {
-        const syn = `${baseHref}?${paramKey}=${n}`;
-        const u = new URL(syn);
-        if (normalizeCatalogPath(u.pathname) === curPathNorm) out.add(u.href.split("#")[0]);
-      }
-    } catch {
-      /* ignore */
-    }
-  }
-
-  return [...out];
-}
-
 function dedupeSectionsByPath(sections) {
   const seen = new Set();
   const out = [];
@@ -245,67 +154,6 @@ function extractSectionLinks(html, pageUrl) {
     }
   });
   return out;
-}
-
-function extractProducts(html, pageUrl) {
-  const $ = cheerio.load(html);
-  const listingPath =
-    normalizeCatalogPath(new URL(pageUrl).pathname) ?? "/catalog/";
-  const pageIdx = listingPageIndex(pageUrl);
-  /** @type {any[]} */
-  const items = [];
-  $(".catalog-product-outer").each((idx, outer) => {
-    const box = $(outer).find(".catalog-product").first();
-    const titleA = box.find(".product-bottom a.product-title").first();
-    const href = titleA.attr("href");
-    const title = titleA.text().trim();
-    if (!href || !title) return;
-
-    let absUrl;
-    try {
-      absUrl = new URL(href, pageUrl).href;
-    } catch {
-      return;
-    }
-    if (!absUrl.includes("/catalog/")) return;
-
-    const imgEl = box.find("a.product-picture img").first();
-    const imgSrc = imgEl.attr("src") || imgEl.attr("data-src") || imgEl.attr("data-lazyload-src") || "";
-    let image = imgSrc;
-    try {
-      image = imgSrc ? new URL(imgSrc, BASE).href : "";
-    } catch {
-      image = imgSrc.startsWith("http") ? imgSrc : `${BASE}${imgSrc}`;
-    }
-
-    /** @type {Record<string, string>} */
-    const properties = {};
-    box.find(".product-bottom .product-property").each((__, prop) => {
-      const name = $(prop).find(".product-property-name").first().text().replace(/:\s*$/, "").trim();
-      const value = $(prop).find(".product-property-value").first().text().trim();
-      if (name && value) properties[name] = value;
-    });
-
-    let priceHint = "";
-    const priceBox = box.find(".product-bottom .product-base-price .base-price-help div").first();
-    if (priceBox.length) priceHint = priceBox.text().replace(/\s+/g, " ").trim();
-
-    const availability = box.find(".product-bottom .product-available span").first().text().trim();
-
-    items.push({
-      url: absUrl.split("#")[0],
-      title,
-      image,
-      properties,
-      priceHint,
-      availability,
-      listingPage: pageUrl,
-      listingPageIndex: pageIdx,
-      listingPosition: idx,
-      categoryPath: inferCategoryPathFromProductUrl(absUrl.split("#")[0], listingPath),
-    });
-  });
-  return items;
 }
 
 function mergeCategoryMeta(parentUrl, sections) {
@@ -411,9 +259,15 @@ async function main() {
       if (!visited.has(p)) queue.push(p);
     }
 
-    const found = extractProducts(html, url);
+    const found = extractListingProducts(html, url);
     for (const p of found) {
-      products.set(p.url, p);
+      const prev = products.get(p.url);
+      if (!prev) {
+        products.set(p.url, p);
+        continue;
+      }
+      const chosen = pickMoreSpecificCategoryPath(categoryMeta, prev.categoryPath, p.categoryPath);
+      if (chosen === p.categoryPath) products.set(p.url, p);
     }
 
     const lk = listingPathKey(url);
