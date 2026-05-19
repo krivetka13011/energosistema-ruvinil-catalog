@@ -261,6 +261,8 @@ const items = catalog.products.map((p) => {
   const cat = categoryMap.get(cp);
   const catTitle = cat ? cat.title : "";
   const priceHint = (p.priceHint && String(p.priceHint).trim()) || "";
+  const availability = (p.availability && String(p.availability).trim()) || "";
+  const wholesaleOpt = (p.properties && String(p.properties["Опт. прайс, руб."] ?? "").trim()) || "";
   const unitPriceRub = catalogCartUnitPriceRub(p);
   const priceDisplay = catalogCartPriceLabelForCart(p);
   const image = primaryImage(p);
@@ -280,6 +282,8 @@ const items = catalog.products.map((p) => {
     category: catTitle,
     image,
     priceHint,
+    availability,
+    wholesaleOpt,
     haystack,
     unitPriceRub: unitPriceRub != null ? unitPriceRub : null,
     priceDisplay: priceDisplay || priceHint,

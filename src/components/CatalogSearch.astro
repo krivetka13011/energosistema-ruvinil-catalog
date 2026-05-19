@@ -6,10 +6,7 @@ interface Props {
 const { class: className = "" } = Astro.props;
 ---
 
-<div
-  class:list={["relative", className]}
-  data-catalog-search
->
+<div class:list={["w-full", className]} data-catalog-search>
   <label class="block">
     <span class="sr-only">Поиск по каталогу</span>
     <div class="relative">
@@ -33,13 +30,6 @@ const { class: className = "" } = Astro.props;
       />
     </div>
   </label>
-  <div
-    data-catalog-search-dropdown
-    class="absolute left-0 right-0 z-50 mt-2 hidden overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg ring-1 ring-slate-900/5"
-    role="listbox"
-    aria-live="polite"
-  >
-  </div>
 </div>
 
 <script>

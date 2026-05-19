@@ -10,6 +10,8 @@ function row(haystack: string, title = "Труба гофрированная П
     category: "",
     image: "",
     priceHint: "",
+    availability: "",
+    wholesaleOpt: "",
     haystack: normSearchText(haystack),
     unitPriceRub: null,
     priceDisplay: "",

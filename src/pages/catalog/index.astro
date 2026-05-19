@@ -18,6 +18,7 @@ const roots = childCategoriesOrdered(catalog.categories, "/catalog/");
   description={`Электротехническая продукция: ${catalog.products.length} позиций.`}
   catalog={catalog}
 >
+  <div data-catalog-page>
   <section class="catalog-supplier-bg text-white">
     <div class="mx-auto max-w-7xl px-4 pb-6 pt-10 md:pb-8 md:pt-14">
       <nav class="reveal text-sm text-sky-100/90">
@@ -41,13 +42,13 @@ const roots = childCategoriesOrdered(catalog.categories, "/catalog/");
       </p>
     </div>
 
-    <div class="relative z-20 mx-auto max-w-7xl overflow-visible px-4 pb-8">
-      <div class="reveal overflow-visible rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200/80 md:p-5">
+    <div class="relative z-20 mx-auto max-w-7xl px-4 pb-6">
+      <div class="reveal rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-200/80 md:p-5">
         <CatalogSearch />
       </div>
     </div>
 
-    <div class="mx-auto max-w-7xl px-4 pb-14 md:pb-20">
+    <div data-catalog-browse class="mx-auto max-w-7xl px-4 pb-14 md:pb-20">
       <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {
           roots.map((c) => (
@@ -64,4 +65,16 @@ const roots = childCategoriesOrdered(catalog.categories, "/catalog/");
       </div>
     </div>
   </section>
+
+  <section data-catalog-search-results class="hidden border-t border-slate-200 bg-slate-50">
+    <div class="mx-auto max-w-6xl px-4 py-10">
+      <h2 class="font-display text-xl font-semibold text-brand-900">Результаты поиска</h2>
+      <p data-catalog-search-meta class="mt-2 text-sm text-slate-600"></p>
+      <p data-catalog-search-empty class="mt-6 hidden text-sm text-slate-600">
+        Ничего не найдено. Попробуйте артикул, «100 м» или другой порядок слов.
+      </p>
+      <div data-catalog-search-grid class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4"></div>
+    </div>
+  </section>
+  </div>
 </Layout>

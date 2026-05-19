@@ -5,6 +5,8 @@ export type SearchIndexRow = {
   category: string;
   image: string;
   priceHint: string;
+  availability: string;
+  wholesaleOpt: string;
   haystack: string;
   unitPriceRub: number | null;
   priceDisplay: string;

@@ -55,6 +55,7 @@ const shown = sortProductsInCategoryTree(inTree);
   description={`${cat.title}: ${inTree.length} позиций в дереве раздела.`}
   catalog={catalog}
 >
+  <div data-catalog-page>
   <section class="border-b border-slate-200 bg-white">
     <div class="mx-auto max-w-6xl px-4 py-10">
       <nav class="reveal flex flex-wrap gap-x-2 gap-y-1 text-sm text-slate-500">
@@ -88,6 +89,7 @@ const shown = sortProductsInCategoryTree(inTree);
   </section>
 
   <section class="mx-auto max-w-6xl px-4 py-12">
+    <div data-catalog-browse>
     {
       children.length ? (
         <>
@@ -123,5 +125,16 @@ const shown = sortProductsInCategoryTree(inTree);
         )
       }
     </div>
+    </div>
+
+    <div data-catalog-search-results class="hidden">
+      <h2 class="font-display text-xl font-semibold text-brand-900">Результаты поиска</h2>
+      <p data-catalog-search-meta class="mt-2 text-sm text-slate-600"></p>
+      <p data-catalog-search-empty class="mt-6 hidden text-sm text-slate-600">
+        Ничего не найдено. Попробуйте артикул, «100 м» или другой порядок слов.
+      </p>
+      <div data-catalog-search-grid class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4"></div>
+    </div>
   </section>
+  </div>
 </Layout>
