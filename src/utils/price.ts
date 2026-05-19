@@ -93,11 +93,14 @@ export function pieceLengthMeters(product: CatalogProduct): number | null {
     const n = parseFirstPositiveRub(raw.replace(/\s*м\.?\s*$/i, ""));
     if (n != null && n > 0) return n;
   }
-  const dimMm = product.title.match(/(?:х|x)(\d+)\s*мм\b/i);
-  if (dimMm) {
-    const mm = Number.parseInt(dimMm[1], 10);
-    if (mm >= 100) return mm / 1000;
+  const mmRe = /(\d+)\s*мм/gi;
+  let lastMm: number | null = null;
+  let mmMatch: RegExpExecArray | null;
+  while ((mmMatch = mmRe.exec(product.title)) !== null) {
+    const mm = Number.parseInt(mmMatch[1], 10);
+    if (mm >= 100) lastMm = mm;
   }
+  if (lastMm != null) return lastMm / 1000;
   const endM = product.title.match(/(\d+(?:[.,]\d+)?)\s*м\s*$/i);
   if (endM) {
     const n = Number.parseFloat(endM[1].replace(",", "."));

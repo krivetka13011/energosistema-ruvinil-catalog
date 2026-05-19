@@ -149,11 +149,15 @@ function pieceLengthMeters(p) {
     const n = parseFirstPositiveRub(String(raw).replace(/\s*м\.?\s*$/i, ""));
     if (n != null && n > 0) return n;
   }
-  const dimMm = (p.title || "").match(/(?:х|x)(\d+)\s*мм\b/i);
-  if (dimMm) {
-    const mm = Number.parseInt(dimMm[1], 10);
-    if (mm >= 100) return mm / 1000;
+  const title = p.title || "";
+  const mmRe = /(\d+)\s*мм/gi;
+  let lastMm = null;
+  let mmMatch;
+  while ((mmMatch = mmRe.exec(title)) !== null) {
+    const mm = Number.parseInt(mmMatch[1], 10);
+    if (mm >= 100) lastMm = mm;
   }
+  if (lastMm != null) return lastMm / 1000;
   return null;
 }
 
