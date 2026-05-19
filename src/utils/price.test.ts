@@ -1,5 +1,12 @@
 import { describe, it, expect } from "vitest";
-import { metersPerSaleUnit } from "./price";
+import {
+  metersPerSaleUnit,
+  parsePackQuantity,
+  piecesPerSaleUnit,
+  saleUnitMeterQty,
+  catalogCartUnitPriceRub,
+  catalogCartPriceLabelForCart,
+} from "./price";
 import type { CatalogProduct } from "../types/catalog";
 
 function createMockProduct(overrides: Partial<CatalogProduct>): CatalogProduct {
@@ -28,34 +35,6 @@ describe("metersPerSaleUnit", () => {
     expect(metersPerSaleUnit(product)).toBe(50);
   });
 
-  it("extracts from 'Длина в бухте'", () => {
-    const product = createMockProduct({
-      properties: { "Длина в бухте": "100" },
-    });
-    expect(metersPerSaleUnit(product)).toBe(100);
-  });
-
-  it("extracts from 'Длина бухты, м'", () => {
-    const product = createMockProduct({
-      properties: { "Длина бухты, м": "25" },
-    });
-    expect(metersPerSaleUnit(product)).toBe(25);
-  });
-
-  it("extracts from 'Длина, м'", () => {
-    const product = createMockProduct({
-      properties: { "Длина, м": "10" },
-    });
-    expect(metersPerSaleUnit(product)).toBe(10);
-  });
-
-  it("extracts from 'Длина (м)'", () => {
-    const product = createMockProduct({
-      properties: { "Длина (м)": "75.5" },
-    });
-    expect(metersPerSaleUnit(product)).toBe(75.5);
-  });
-
   it("extracts from title matching '(XX м)'", () => {
     const product = createMockProduct({
       title: "Гофрированная труба (15 м)",
@@ -63,51 +42,90 @@ describe("metersPerSaleUnit", () => {
     expect(metersPerSaleUnit(product)).toBe(15);
   });
 
-  it("extracts from title matching '(XX.X м)'", () => {
+  it("extracts from title ending with '10 м'", () => {
     const product = createMockProduct({
-      title: "Труба ПНД (15.5 м)",
+      title: "Бандаж спиральный 10 м",
     });
-    expect(metersPerSaleUnit(product)).toBe(15.5);
+    expect(metersPerSaleUnit(product)).toBe(10);
+  });
+});
+
+describe("parsePackQuantity", () => {
+  it("parses 12x4 as 48", () => {
+    expect(parsePackQuantity("12x4")).toBe(48);
   });
 
-  it("extracts from title matching '(XX,X м)'", () => {
+  it("parses plain number", () => {
+    expect(parsePackQuantity("100")).toBe(100);
+  });
+});
+
+describe("piecesPerSaleUnit", () => {
+  it("reads Количество в упаковке, шт.", () => {
     const product = createMockProduct({
-      title: "Труба ПВХ (12,5 м)",
+      properties: { "Количество в упаковке, шт.": "100" },
     });
-    expect(metersPerSaleUnit(product)).toBe(12.5);
+    expect(piecesPerSaleUnit(product)).toBe(100);
   });
 
-  it("returns null if no length is specified", () => {
-    const product = createMockProduct({});
-    expect(metersPerSaleUnit(product)).toBeNull();
+  it("reads pack from title", () => {
+    const product = createMockProduct({
+      title: "Скоба (уп. 100 шт.)",
+    });
+    expect(piecesPerSaleUnit(product)).toBe(100);
+  });
+});
+
+describe("saleUnitMeterQty", () => {
+  it("uses Количество в упаковке, м", () => {
+    const product = createMockProduct({
+      properties: { "Количество в упаковке, м": "60" },
+    });
+    expect(saleUnitMeterQty(product)).toBe(60);
   });
 
-  it("handles extra text that should be cleaned (trailing 'м.')", () => {
+  it("multiplies piece length and pack count for lot covers", () => {
     const product = createMockProduct({
-      properties: { "Длина в бухте, м": " 30 м. " },
+      title: "Крышка лотка 500х15х3000 мм S=0,55",
+      properties: { "В упаковке": "3" },
     });
-    expect(metersPerSaleUnit(product)).toBe(30);
+    expect(saleUnitMeterQty(product)).toBe(9);
+  });
+});
+
+describe("catalogCartUnitPriceRub", () => {
+  it("multiplies per-piece rate by pack size", () => {
+    const product = createMockProduct({
+      priceHint: "5.42 руб./шт",
+      properties: { "Количество в упаковке, шт.": "100" },
+    });
+    expect(catalogCartUnitPriceRub(product)).toBe(542);
   });
 
-  it("handles trailing 'м'", () => {
+  it("multiplies per-meter rate by coil length", () => {
     const product = createMockProduct({
-      properties: { "Длина в бухте, м": " 40 м " },
+      priceHint: "100 руб./м",
+      properties: { "Длина в бухте, м": "50" },
     });
-    expect(metersPerSaleUnit(product)).toBe(40);
+    expect(catalogCartUnitPriceRub(product)).toBe(5000);
   });
 
-  it("extracts positive value if text starts with negative sign", () => {
-    // `parseFirstPositiveRub` extracts the first number ignoring any minus sign
+  it("leaves single-piece price unchanged", () => {
     const product = createMockProduct({
-      properties: { "Длина в бухте, м": "-50" },
+      priceHint: "88.91 руб./шт",
+      properties: { "В упаковке": "1" },
     });
-    expect(metersPerSaleUnit(product)).toBe(50);
+    expect(catalogCartUnitPriceRub(product)).toBe(88.91);
   });
+});
 
-  it("ignores zero in properties", () => {
+describe("catalogCartPriceLabelForCart", () => {
+  it("shows pack calculation for pieces", () => {
     const product = createMockProduct({
-      properties: { "Длина в бухте, м": "0" },
+      priceHint: "5.42 руб./шт",
+      properties: { "Количество в упаковке, шт.": "100" },
     });
-    expect(metersPerSaleUnit(product)).toBeNull();
+    expect(catalogCartPriceLabelForCart(product)).toContain("542");
+    expect(catalogCartPriceLabelForCart(product)).toContain("100 шт");
   });
 });

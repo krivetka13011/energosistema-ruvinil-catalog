@@ -94,9 +94,27 @@ function catalogPriceLabelForCart(p) {
   return "";
 }
 
+function parsePackQuantity(raw) {
+  const s = String(raw).replace(/\u00a0/g, " ").trim();
+  if (!s) return null;
+  const mul = s.match(/^(\d+)\s*[xх*×]\s*(\d+)$/i);
+  if (mul) {
+    const a = Number.parseInt(mul[1], 10);
+    const b = Number.parseInt(mul[2], 10);
+    if (a > 0 && b > 0) return a * b;
+  }
+  const n = parseFirstPositiveRub(s);
+  return n != null && n > 0 ? n : null;
+}
+
 function isPricePerMeterHint(hint) {
   const h = String(hint).toLowerCase().replace(/\u00a0/g, " ");
   return /руб\.?\s*\/\s*м/i.test(h) || /₽\s*\/\s*м/.test(h) || /rub\.?\s*\/\s*m/i.test(h);
+}
+
+function isPricePerPieceHint(hint) {
+  const h = String(hint).toLowerCase().replace(/\u00a0/g, " ");
+  return /руб\.?\s*\/\s*шт/i.test(h) || /₽\s*\/\s*шт/.test(h) || /rub\.?\s*\/\s*(шт|sht)/i.test(h);
 }
 
 function metersPerSaleUnit(p) {
@@ -115,17 +133,79 @@ function metersPerSaleUnit(p) {
     const n = Number.parseFloat(m[1].replace(",", "."));
     if (Number.isFinite(n) && n > 0) return n;
   }
+  const endM = title.match(/(\d+(?:[.,]\d+)?)\s*м\s*$/i);
+  if (endM) {
+    const n = Number.parseFloat(endM[1].replace(",", "."));
+    if (Number.isFinite(n) && n > 0) return n;
+  }
   return null;
+}
+
+function pieceLengthMeters(p) {
+  const props = p.properties ?? {};
+  for (const k of ["Кратность упаковки, м", "Длина отрезка, м", "Длина изделия, м"]) {
+    const raw = props[k]?.trim?.();
+    if (!raw) continue;
+    const n = parseFirstPositiveRub(String(raw).replace(/\s*м\.?\s*$/i, ""));
+    if (n != null && n > 0) return n;
+  }
+  const dimMm = (p.title || "").match(/(?:х|x)(\d+)\s*мм\b/i);
+  if (dimMm) {
+    const mm = Number.parseInt(dimMm[1], 10);
+    if (mm >= 100) return mm / 1000;
+  }
+  return null;
+}
+
+function piecesPerSaleUnit(p) {
+  const props = p.properties ?? {};
+  for (const k of ["Количество в упаковке, шт.", "Кол-во в упаковке, шт.", "В упаковке"]) {
+    const raw = props[k]?.trim?.();
+    if (!raw) continue;
+    const n = parsePackQuantity(raw);
+    if (n != null && n > 0) return n;
+  }
+  const m = (p.title || "").match(/\(уп\.?\s*([^)]+?)\s*шт\.?\)/i);
+  if (m) {
+    const n = parsePackQuantity(m[1]);
+    if (n != null && n > 0) return n;
+  }
+  return null;
+}
+
+function saleUnitMeterQty(p) {
+  const props = p.properties ?? {};
+  const coil = metersPerSaleUnit(p);
+  if (coil != null) return coil;
+  const packM = props["Количество в упаковке, м"]?.trim?.();
+  if (packM) {
+    const n = parseFirstPositiveRub(String(packM).replace(/\s*м\.?\s*$/i, ""));
+    if (n != null && n > 0) return n;
+  }
+  const piece = pieceLengthMeters(p);
+  const pcs = piecesPerSaleUnit(p);
+  if (piece != null && pcs != null && pcs > 0) return Math.round(piece * pcs * 1000) / 1000;
+  return null;
+}
+
+function roundRub(n) {
+  return Math.round(n * 100) / 100;
 }
 
 function catalogCartUnitPriceRub(p) {
   const rate = catalogUnitPriceRub(p);
   if (rate == null) return null;
   const hint = (p.priceHint && String(p.priceHint).trim()) || "";
-  if (!hint || !isPricePerMeterHint(hint)) return Math.round(rate * 100) / 100;
-  const meters = metersPerSaleUnit(p);
-  if (meters == null) return null;
-  return Math.round(rate * meters * 100) / 100;
+  if (hint && isPricePerMeterHint(hint)) {
+    const meters = saleUnitMeterQty(p);
+    if (meters == null) return null;
+    return roundRub(rate * meters);
+  }
+  if (!hint || isPricePerPieceHint(hint)) {
+    const pcs = piecesPerSaleUnit(p);
+    if (pcs != null && pcs > 1) return roundRub(rate * pcs);
+  }
+  return roundRub(rate);
 }
 
 function catalogCartPriceLabelForCart(p) {
@@ -134,13 +214,21 @@ function catalogCartPriceLabelForCart(p) {
   const hint = (p.priceHint && String(p.priceHint).trim()) || "";
   const wholesale = (p.properties && String(p.properties["Опт. прайс, руб."] ?? "").trim()) || "";
   if (hint && isPricePerMeterHint(hint)) {
-    const meters = metersPerSaleUnit(p);
+    const meters = saleUnitMeterQty(p);
     const head = wholesale ? `Опт: ${formatRub(rate)}/м` : hint;
     if (meters == null) {
-      return `${head} — длина бухты не найдена в данных, сумму за упаковку считайте вручную`;
+      return `${head} — не удалось определить метраж упаковки, сумму считайте вручную`;
     }
-    const total = Math.round(rate * meters * 100) / 100;
+    const total = roundRub(rate * meters);
     return `${head} × ${String(meters).replace(".", ",")} м = ${formatRub(total)} за упаковку`;
+  }
+  if (!hint || isPricePerPieceHint(hint)) {
+    const pcs = piecesPerSaleUnit(p);
+    if (pcs != null && pcs > 1) {
+      const head = wholesale ? `Опт: ${formatRub(rate)}/шт` : hint || `${formatRub(rate)}/шт`;
+      const total = roundRub(rate * pcs);
+      return `${head} × ${String(pcs).replace(".", ",")} шт = ${formatRub(total)} за упаковку`;
+    }
   }
   return catalogPriceLabelForCart(p);
 }

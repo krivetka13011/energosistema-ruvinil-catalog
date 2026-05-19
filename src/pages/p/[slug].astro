@@ -3,7 +3,11 @@ import Layout from "../../layouts/Layout.astro";
 import AddToCartButton from "../../components/AddToCartButton.astro";
 import CompareButton from "../../components/CompareButton.astro";
 import { catalog, normalizePath, productPrimaryImage } from "../../utils/catalog";
-import { catalogCartPriceLabelForCart, catalogCartUnitPriceRub } from "../../utils/price";
+import {
+  catalogCardPriceLabel,
+  catalogCartPriceLabelForCart,
+  catalogCartUnitPriceRub,
+} from "../../utils/price";
 import type { CatalogCategory } from "../../types/catalog";
 import { baseUrl } from "../../utils/baseUrl";
 
@@ -39,6 +43,7 @@ const sku = product.properties["Артикул"] ?? "";
 const primaryImg = productPrimaryImage(product);
 const unitRub = catalogCartUnitPriceRub(product);
 const priceLabel = catalogCartPriceLabelForCart(product);
+const cardPriceLabel = catalogCardPriceLabel(product);
 const galleryImages = product.images.length ? product.images : primaryImg ? [primaryImg] : [];
 ---
 
@@ -101,7 +106,9 @@ const galleryImages = product.images.length ? product.images : primaryImg ? [pri
           ) : null}
           <h1 class="mt-2 font-display text-3xl font-bold leading-tight text-brand-950 md:text-4xl">{product.title}</h1>
           {product.availability ? <p class="mt-3 text-sm font-medium text-emerald-700">{product.availability}</p> : null}
-          {product.priceHint ? <p class="mt-4 text-2xl font-semibold text-brand-900">{product.priceHint}</p> : (
+          {cardPriceLabel ? (
+            <p class="mt-4 text-lg font-semibold leading-snug text-brand-900">{cardPriceLabel}</p>
+          ) : (
             <p class="mt-4 text-lg text-slate-600">Оптовые цены уточняйте у менеджера.</p>
           )}
           <div class="mt-6 flex max-w-md flex-col gap-2">
