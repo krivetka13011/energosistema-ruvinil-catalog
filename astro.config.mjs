@@ -1,5 +1,6 @@
 import { defineConfig } from "astro/config";
 import tailwind from "@astrojs/tailwind";
+import sitemap from "@astrojs/sitemap";
 
 function normalizeBase(raw) {
   if (!raw || raw === "/") return "/";
@@ -22,5 +23,13 @@ function resolveBase() {
 export default defineConfig({
   site: process.env.PUBLIC_SITE_URL || "https://example.pages.dev",
   base: resolveBase(),
-  integrations: [tailwind({ applyBaseStyles: false })],
+  integrations: [
+    tailwind({ applyBaseStyles: false }),
+    sitemap({
+      filter: (page) =>
+        !page.includes("/cart/") &&
+        !page.includes("/compare/") &&
+        !page.includes("/search/"),
+    }),
+  ],
 });

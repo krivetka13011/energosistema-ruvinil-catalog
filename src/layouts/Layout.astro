@@ -3,15 +3,36 @@ import "../styles/global.css";
 import { ViewTransitions } from "astro:transitions";
 import type { CatalogPayload } from "../types/catalog";
 import { baseUrl } from "../utils/baseUrl";
+import { resolveOgImage } from "../utils/seo";
 
 interface Props {
   title: string;
   description?: string;
   catalog: CatalogPayload;
+  ogImage?: string;
+  canonicalPath?: string;
+  ogType?: string;
+  noindex?: boolean;
 }
 
-const { title, description, catalog } = Astro.props;
+const {
+  title,
+  description,
+  catalog,
+  ogImage,
+  canonicalPath,
+  ogType = "website",
+  noindex = false,
+} = Astro.props;
 const { company } = catalog;
+const site = Astro.site;
+const metaDescription = description?.trim() ?? "";
+const canonical =
+  canonicalPath && site
+    ? new URL(baseUrl(canonicalPath.startsWith("/") ? canonicalPath : `/${canonicalPath}`), site).href
+    : Astro.url.href;
+const ogImageUrl = resolveOgImage(site, ogImage) ?? (site ? new URL(baseUrl("/"), site).href : undefined);
+const robotsContent = noindex ? "noindex, nofollow" : "index, follow";
 ---
 
 <!doctype html>
@@ -20,9 +41,21 @@ const { company } = catalog;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="referrer" content="no-referrer" />
-    <meta name="generator" content={Astro.generator} />
+    <meta name="robots" content={robotsContent} />
     <title>{title}</title>
-    {description ? <meta name="description" content={description} /> : null}
+    {metaDescription ? <meta name="description" content={metaDescription} /> : null}
+    <link rel="canonical" href={canonical} />
+    <meta property="og:locale" content="ru_RU" />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content={company.name} />
+    <meta property="og:title" content={title} />
+    {metaDescription ? <meta property="og:description" content={metaDescription} /> : null}
+    <meta property="og:url" content={canonical} />
+    {ogImageUrl ? <meta property="og:image" content={ogImageUrl} /> : null}
+    <meta name="twitter:card" content={ogImageUrl ? "summary_large_image" : "summary"} />
+    <meta name="twitter:title" content={title} />
+    {metaDescription ? <meta name="twitter:description" content={metaDescription} /> : null}
+    {ogImageUrl ? <meta name="twitter:image" content={ogImageUrl} /> : null}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

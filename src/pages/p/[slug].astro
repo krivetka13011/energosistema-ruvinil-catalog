@@ -4,6 +4,7 @@ import AddToCartButton from "../../components/AddToCartButton.astro";
 import CompareButton from "../../components/CompareButton.astro";
 import { catalog, normalizePath, productPrimaryImage } from "../../utils/catalog";
 import { catalogCartPriceLabelForCart, catalogCartUnitPriceRub } from "../../utils/price";
+import { productMetaDescription } from "../../utils/seo";
 import type { CatalogCategory } from "../../types/catalog";
 import { baseUrl } from "../../utils/baseUrl";
 
@@ -40,12 +41,16 @@ const primaryImg = productPrimaryImage(product);
 const unitRub = catalogCartUnitPriceRub(product);
 const priceLabel = catalogCartPriceLabelForCart(product);
 const galleryImages = product.images.length ? product.images : primaryImg ? [primaryImg] : [];
+const metaDescription = productMetaDescription(product, catalog.company.contacts.phone);
 ---
 
 <Layout
   title={`${product.title} — ${catalog.company.name}`}
-  description={product.descriptionHtml ? undefined : `${product.title}. ${sku ? `Артикул ${sku}.` : ""} Заказ: ${catalog.company.contacts.phone}`}
+  description={metaDescription}
   catalog={catalog}
+  canonicalPath={`/p/${product.slug}/`}
+  ogImage={primaryImg || undefined}
+  ogType="product"
 >
   <article class="mx-auto max-w-6xl px-4 py-12">
     <nav class="reveal flex flex-wrap gap-x-2 gap-y-1 text-sm text-slate-500">

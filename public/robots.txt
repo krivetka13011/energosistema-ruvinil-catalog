@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Disallow: /cart/
+Disallow: /compare/
+
+User-agent: Yandex
+Allow: /
+Disallow: /cart/
+Disallow: /compare/
+Clean-param: q&search /catalog/
+Clean-param: q /catalog/
+
+Sitemap: https://energosistema.example/sitemap-index.xml
